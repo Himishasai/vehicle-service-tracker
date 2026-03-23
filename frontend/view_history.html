@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <button onclick="load()">Load</button>
 <table border="1">
 <thead><tr>
@@ -21,4 +22,29 @@ t.innerHTML+=`<tr>
 </tr>`;
 });
 }
+=======
+<button onclick="load()">Load</button>
+<table border="1">
+<thead><tr>
+<th>Vehicle</th><th>Date</th><th>Desc</th><th>Cost</th><th>Mech</th>
+</tr></thead>
+<tbody id="t"></tbody>
+</table>
+
+<script>
+async function load(){
+let r=await fetch("http://127.0.0.1:5000/service_history");
+let d=await r.json();
+t.innerHTML="";
+d.forEach(x=>{
+t.innerHTML+=`<tr>
+<td>${x.vehicle_number}</td>
+<td>${x.service_date}</td>
+<td>${x.description}</td>
+<td>${x.cost}</td>
+<td>${x.mechanic}</td>
+</tr>`;
+});
+}
+>>>>>>> a1442d9792a99537e7be3135ee40273a833bf3b2
 </script>
