@@ -1,0 +1,24 @@
+<form id="f">
+<input id="owner_id" placeholder="Owner ID">
+<input id="vehicle_number" placeholder="Vehicle Number">
+<input id="model" placeholder="Model">
+<input id="type" placeholder="Type">
+<button>Add Vehicle</button>
+</form>
+
+<script>
+f.onsubmit=async(e)=>{
+e.preventDefault();
+await fetch("http://127.0.0.1:5000/add_vehicle",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+owner_id:owner_id.value,
+vehicle_number:vehicle_number.value,
+model:model.value,
+type:type.value
+})
+});
+alert("Vehicle Added");
+}
+</script>

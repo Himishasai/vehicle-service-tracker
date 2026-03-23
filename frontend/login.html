@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Login</h2>
+
+<form onsubmit="login(event)">
+<input id="username" placeholder="Username"><br>
+<input id="password" type="password" placeholder="Password"><br>
+<button>Login</button>
+</form>
+
+<script>
+function login(e){
+e.preventDefault();
+if(username.value=="admin" && password.value=="1234"){
+alert("Login Success");
+window.location="index.html";
+}else{
+alert("Invalid");
+}
+}
+</script>
+
+</body>
+</html>
