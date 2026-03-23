@@ -1,0 +1,26 @@
+<form id="f">
+<input id="vehicle_id" placeholder="Vehicle ID">
+<input id="mechanic_id" placeholder="Mechanic ID">
+<input id="service_date" type="date">
+<input id="description" placeholder="Description">
+<input id="cost" placeholder="Cost">
+<button>Add Service</button>
+</form>
+
+<script>
+f.onsubmit=async(e)=>{
+e.preventDefault();
+await fetch("http://127.0.0.1:5000/add_service",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+vehicle_id:vehicle_id.value,
+mechanic_id:mechanic_id.value,
+service_date:service_date.value,
+description:description.value,
+cost:cost.value
+})
+});
+alert("Service Added");
+}
+</script>
