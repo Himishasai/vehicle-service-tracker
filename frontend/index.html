@@ -1,40 +1,128 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Home</title>
-<link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Vehicle Service Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+        }
+
+        .navbar {
+            background: #2c3e50;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .nav-links a {
+            color: white;
+            margin-left: 20px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .nav-links a:hover {
+            color: #1abc9c;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .card h3 {
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #1abc9c;
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #16a085;
+        }
+    </style>
 </head>
+
 <body>
 
-<h1>🚗 Vehicle Service Tracker</h1>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <h2>🚗 Vehicle Service System</h2>
 
-<div class="menu">
-<a href="add_owner.html">Add Owner</a>
-<a href="add_vehicle.html">Add Vehicle</a>
-<a href="add_service.html">Add Service</a>
-<a href="view_history.html">View History</a>
-</div>
+        <div class="nav-links">
+            <a href="add_owner.html">Add Owner</a>
+            <a href="add_vehicle.html">Add Vehicle</a>
+            <a href="add_service.html">Add Service</a>
+            <a href="view_history.html">History</a>
+            <a href="login.html">Logout</a>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="container">
+        <h1>Dashboard</h1>
+
+        <div class="cards">
+
+            <div class="card">
+                <h3>👤 Add Owner</h3>
+                <p>Create new vehicle owner</p>
+                <a href="add_owner.html" class="btn">Open</a>
+            </div>
+
+            <div class="card">
+                <h3>🚘 Add Vehicle</h3>
+                <p>Register new vehicle</p>
+                <a href="add_vehicle.html" class="btn">Open</a>
+            </div>
+
+            <div class="card">
+                <h3>🔧 Add Service</h3>
+                <p>Add service record</p>
+                <a href="add_service.html" class="btn">Open</a>
+            </div>
+
+            <div class="card">
+                <h3>📊 View History</h3>
+                <p>Check service records</p>
+                <a href="view_history.html" class="btn">Open</a>
+            </div>
+
+        </div>
+    </div>
 
 </body>
-=======
-<!DOCTYPE html>
-<html>
-<head>
-<title>Home</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<h1>🚗 Vehicle Service Tracker</h1>
-
-<div class="menu">
-<a href="add_owner.html">Add Owner</a>
-<a href="add_vehicle.html">Add Vehicle</a>
-<a href="add_service.html">Add Service</a>
-<a href="view_history.html">View History</a>
-</div>
-
-</body>
->>>>>>> a1442d9792a99537e7be3135ee40273a833bf3b2
 </html>
