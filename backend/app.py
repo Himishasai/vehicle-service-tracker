@@ -3,7 +3,7 @@ from flask_cors import CORS
 import sqlite3
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend")
 CORS(app)
 
 # ---------------- PATH SETUP ----------------
@@ -26,6 +26,11 @@ def home():
 @app.route("/ui")
 def serve_ui():
     return send_from_directory(FRONTEND_FOLDER, "index.html")
+
+# Serve all frontend files (CSS, JS, other HTML)
+@app.route("/<path:path>")
+def serve_files(path):
+    return send_from_directory(FRONTEND_FOLDER, path)
 
 # ---------------- ADD OWNER ----------------
 @app.route("/add_owner", methods=["POST"])
