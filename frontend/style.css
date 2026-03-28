@@ -1,10 +1,43 @@
-<<<<<<< HEAD
-body{text-align:center;font-family:Arial;background:#f4f4f4}
-.menu a{margin:10px;padding:10px;background:blue;color:white}
-input{margin:5px;padding:8px}
-=======
-body{text-align:center;font-family:Arial;background:#f4f4f4}
-.menu a{margin:10px;padding:10px;background:blue;color:white}
-input{margin:5px;padding:8px}
->>>>>>> a1442d9792a99537e7be3135ee40273a833bf3b2
-button{padding:10px}
+body {
+    margin: 0;
+    font-family: Arial;
+    background: #f4f6f9;
+}
+
+.navbar {
+    background: #2c3e50;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.navbar a {
+    color: white;
+    margin: 10px;
+    text-decoration: none;
+}
+
+.container {
+    padding: 30px;
+    text-align: center;
+}
+
+.cards {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    width: 200px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.card p {
+    font-size: 24px;
+    font-weight: bold;
+}
