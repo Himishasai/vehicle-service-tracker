@@ -1,50 +1,38 @@
-<<<<<<< HEAD
-<form id="f">
-<input id="owner_id" placeholder="Owner ID">
-<input id="vehicle_number" placeholder="Vehicle Number">
-<input id="model" placeholder="Model">
-<input id="type" placeholder="Type">
-<button>Add Vehicle</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Vehicle</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+    <h2>Add Vehicle</h2>
+
+    <input id="owner_id" placeholder="Owner ID"><br><br>
+    <input id="number" placeholder="Vehicle Number"><br><br>
+    <input id="model" placeholder="Model"><br><br>
+    <input id="type" placeholder="Type"><br><br>
+
+    <button onclick="addVehicle()">Add Vehicle</button>
+</div>
 
 <script>
-f.onsubmit=async(e)=>{
-e.preventDefault();
-await fetch("http://127.0.0.1:5000/add_vehicle",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-owner_id:owner_id.value,
-vehicle_number:vehicle_number.value,
-model:model.value,
-type:type.value
-})
-});
-alert("Vehicle Added");
-}
-=======
-<form id="f">
-<input id="owner_id" placeholder="Owner ID">
-<input id="vehicle_number" placeholder="Vehicle Number">
-<input id="model" placeholder="Model">
-<input id="type" placeholder="Type">
-<button>Add Vehicle</button>
-</form>
+async function addVehicle() {
+    await fetch("/add_vehicle", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            owner_id: document.getElementById("owner_id").value,
+            vehicle_number: document.getElementById("number").value,
+            model: document.getElementById("model").value,
+            type: document.getElementById("type").value
+        })
+    });
 
-<script>
-f.onsubmit=async(e)=>{
-e.preventDefault();
-await fetch("http://127.0.0.1:5000/add_vehicle",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-owner_id:owner_id.value,
-vehicle_number:vehicle_number.value,
-model:model.value,
-type:type.value
-})
-});
-alert("Vehicle Added");
+    alert("Vehicle Added ✅");
 }
->>>>>>> a1442d9792a99537e7be3135ee40273a833bf3b2
 </script>
+
+</body>
+</html>
