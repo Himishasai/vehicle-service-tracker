@@ -10,35 +10,27 @@
     <h2>Add Service</h2>
 
     <input type="number" id="vehicle_id" placeholder="Vehicle ID">
-    <input type="text" id="description" placeholder="Service Description">
     <input type="date" id="service_date">
-    <input type="text" id="mechanic" placeholder="Mechanic Name">
+    <input type="text" id="description" placeholder="Service Description">
+    <input type="text" id="mechanic_name" placeholder="Mechanic Name">
 
     <button onclick="addService()">Add Service</button>
 </div>
 
 <script>
-const BASE_URL = "https://vehicle-service-tracker.onrender.com";
-
 function addService() {
-    fetch(BASE_URL + "/add_service", {
+    fetch("/add_service", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
             vehicle_id: document.getElementById("vehicle_id").value,
-            description: document.getElementById("description").value,
             service_date: document.getElementById("service_date").value,
-            mechanic_name: document.getElementById("mechanic").value
+            description: document.getElementById("description").value,
+            mechanic_name: document.getElementById("mechanic_name").value
         })
     })
     .then(res => res.json())
-    .then(data => {
-        alert("Service Added Successfully 🔧");
-        document.getElementById("vehicle_id").value = "";
-        document.getElementById("description").value = "";
-        document.getElementById("service_date").value = "";
-        document.getElementById("mechanic").value = "";
-    })
+    .then(data => alert(data.message))
     .catch(() => alert("Error adding service ❌"));
 }
 </script>
