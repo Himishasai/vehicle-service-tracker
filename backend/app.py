@@ -3,26 +3,27 @@ from flask_cors import CORS
 import sqlite3
 import os
 
-app = Flask(__name__, static_folder="../frontend")
+app = Flask(__name__)
 CORS(app)
 
+# ---------------- PATH ----------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "../database/vehicle.db")
 FRONTEND_FOLDER = os.path.join(BASE_DIR, "../frontend")
 
-# ---------------- DATABASE ----------------
+# ---------------- DB ----------------
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-# ---------------- SERVE UI ----------------
+# ---------------- FRONTEND ----------------
 @app.route("/")
-def serve_ui():
+def home():
     return send_from_directory(FRONTEND_FOLDER, "index.html")
 
 @app.route("/<path:path>")
-def serve_files(path):
+def static_files(path):
     return send_from_directory(FRONTEND_FOLDER, path)
 
 # ---------------- ADD OWNER ----------------
@@ -39,6 +40,7 @@ def add_owner():
 
     conn.commit()
     conn.close()
+
     return jsonify({"message": "Owner added successfully"})
 
 # ---------------- ADD VEHICLE ----------------
@@ -55,6 +57,7 @@ def add_vehicle():
 
     conn.commit()
     conn.close()
+
     return jsonify({"message": "Vehicle added successfully"})
 
 # ---------------- ADD SERVICE ----------------
@@ -65,25 +68,52 @@ def add_service():
     cursor = conn.cursor()
 
     cursor.execute(
-        "INSERT INTO Services (vehicle_id, service_date, description, cost, mechanic_id) VALUES (?, ?, ?, ?, ?)",
-        (data["vehicle_id"], data["service_date"], data["description"], data["cost"], data["mechanic_id"])
+        "INSERT INTO Services (vehicle_id, mechanic_id, service_date, description, cost) VALUES (?, ?, ?, ?, ?)",
+        (
+            data["vehicle_id"],
+            data["mechanic_id"],
+            data["service_date"],
+            data["description"],
+            data["cost"]
+        )
     )
 
     conn.commit()
     conn.close()
+
     return jsonify({"message": "Service added successfully"})
 
-# ---------------- HISTORY ----------------
-@app.route("/service_history", methods=["GET"])
+# ---------------- VIEW HISTORY ----------------
+@app.route("/service_history")
 def service_history():
     conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT v.vehicle_number, s.service_date, s.description, s.cost
+        SELECT 
+            v.vehicle_number,
+            s.service_date,
+            s.description,
+            s.cost
         FROM Services s
         JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
     """)
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    return jsonify([dict(row) for row in rows])
+
+# ---------------- SEARCH ----------------
+@app.route("/search_vehicle/<vehicle_number>")
+def search_vehicle(vehicle_number):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT * FROM Vehicles
+        WHERE vehicle_number LIKE ?
+    """, ('%' + vehicle_number + '%',))
 
     rows = cursor.fetchall()
     conn.close()
@@ -115,4 +145,4 @@ def dashboard():
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000, debug=True)
