@@ -2,13 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vehicle Service Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Dashboard</title>
 
     <style>
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: Arial;
             background: #f4f6f9;
         }
 
@@ -18,7 +17,6 @@
             padding: 15px 30px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
         }
 
         .navbar h2 {
@@ -60,69 +58,83 @@
             margin-bottom: 10px;
         }
 
+        .card h1 {
+            color: #1abc9c;
+        }
+
         .btn {
             display: inline-block;
             margin-top: 10px;
-            padding: 10px 15px;
-            background: #1abc9c;
+            padding: 8px 12px;
+            background: #3498db;
             color: white;
             border-radius: 5px;
             text-decoration: none;
         }
 
         .btn:hover {
-            background: #16a085;
+            background: #2980b9;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- NAVBAR -->
-    <div class="navbar">
-        <h2>🚗 Vehicle Service System</h2>
+<!-- NAVBAR -->
+<div class="navbar">
+    <h2>🚗 Vehicle Service System</h2>
 
-        <div class="nav-links">
-            <a href="add_owner.html">Add Owner</a>
-            <a href="add_vehicle.html">Add Vehicle</a>
-            <a href="add_service.html">Add Service</a>
-            <a href="view_history.html">History</a>
-            <a href="login.html">Logout</a>
-        </div>
+    <div class="nav-links">
+        <a href="add_owner.html">Add Owner</a>
+        <a href="add_vehicle.html">Add Vehicle</a>
+        <a href="add_service.html">Add Service</a>
+        <a href="view_history.html">History</a>
+        <a href="login.html">Logout</a>
     </div>
+</div>
 
-    <!-- DASHBOARD -->
-    <div class="container">
-        <h1>Dashboard</h1>
+<!-- DASHBOARD -->
+<div class="container">
+    <h1>Dashboard</h1>
 
-        <div class="cards">
+    <div class="cards">
 
-            <div class="card">
-                <h3>👤 Add Owner</h3>
-                <p>Create new vehicle owner</p>
-                <a href="add_owner.html" class="btn">Open</a>
-            </div>
-
-            <div class="card">
-                <h3>🚘 Add Vehicle</h3>
-                <p>Register new vehicle</p>
-                <a href="add_vehicle.html" class="btn">Open</a>
-            </div>
-
-            <div class="card">
-                <h3>🔧 Add Service</h3>
-                <p>Add service record</p>
-                <a href="add_service.html" class="btn">Open</a>
-            </div>
-
-            <div class="card">
-                <h3>📊 View History</h3>
-                <p>Check service records</p>
-                <a href="view_history.html" class="btn">Open</a>
-            </div>
-
+        <div class="card">
+            <h3>Total Owners</h3>
+            <h1 id="owners">0</h1>
         </div>
+
+        <div class="card">
+            <h3>Total Vehicles</h3>
+            <h1 id="vehicles">0</h1>
+        </div>
+
+        <div class="card">
+            <h3>Total Services</h3>
+            <h1 id="services">0</h1>
+        </div>
+
     </div>
+</div>
+
+<script>
+const BASE_URL = "http://127.0.0.1:5000"; // 🔁 change when deployed
+
+function loadStats() {
+    fetch(BASE_URL + "/stats")
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("owners").innerText = data.owners;
+        document.getElementById("vehicles").innerText = data.vehicles;
+        document.getElementById("services").innerText = data.services;
+    })
+    .catch(() => {
+        alert("Backend not running!");
+    });
+}
+
+loadStats();
+</script>
 
 </body>
 </html>
