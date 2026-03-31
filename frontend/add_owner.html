@@ -10,17 +10,15 @@
     <h2>Add Owner</h2>
 
     <input type="text" id="name" placeholder="Owner Name">
-    <input type="text" id="phone" placeholder="Phone">
+    <input type="text" id="phone" placeholder="Phone Number">
     <input type="text" id="address" placeholder="Address">
 
     <button onclick="addOwner()">Add Owner</button>
 </div>
 
 <script>
-const BASE_URL = "https://vehicle-service-tracker.onrender.com";
-
 function addOwner() {
-    fetch(BASE_URL + "/add_owner", {
+    fetch("/add_owner", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
@@ -30,13 +28,8 @@ function addOwner() {
         })
     })
     .then(res => res.json())
-    .then(data => {
-        alert("Owner Added Successfully ✅");
-        document.getElementById("name").value = "";
-        document.getElementById("phone").value = "";
-        document.getElementById("address").value = "";
-    })
-    .catch(() => alert("Error adding owner ❌"));
+    .then(data => alert(data.message))
+    .catch(() => alert("Error ❌"));
 }
 </script>
 
