@@ -1,52 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Service History</title>
+    <title>History</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="container">
     <h2>Service History</h2>
-
-    <button onclick="loadHistory()">Load History</button>
-
-    <table border="1" align="center">
-        <thead>
-            <tr>
-                <th>Vehicle</th>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Cost</th>
-                <th>Mechanic</th>
-            </tr>
-        </thead>
-        <tbody id="table"></tbody>
-    </table>
+    <ul id="list"></ul>
 </div>
 
 <script>
-async function loadHistory() {
-    const res = await fetch("/service_history");
-    const data = await res.json();
-
-    let table = document.getElementById("table");
-    table.innerHTML = "";
-
+fetch("/service_history")
+.then(res => res.json())
+.then(data => {
+    let list = document.getElementById("list");
     data.forEach(item => {
-        let row = `
-        <tr>
-            <td>${item.vehicle_number}</td>
-            <td>${item.service_date}</td>
-            <td>${item.description}</td>
-            <td>${item.cost}</td>
-            <td>${item.mechanic}</td>
-        </tr>
-        `;
-        table.innerHTML += row;
+        let li = document.createElement("li");
+        li.innerText = item.vehicle_number + " - " + item.description;
+        list.appendChild(li);
     });
-}
+});
 </script>
 
 </body>

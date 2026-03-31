@@ -3,10 +3,9 @@ from flask_cors import CORS
 import sqlite3
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend")
 CORS(app)
 
-# ---------------- PATH SETUP ----------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "../database/vehicle.db")
 FRONTEND_FOLDER = os.path.join(BASE_DIR, "../frontend")
@@ -17,18 +16,13 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-# ---------------- SERVE FRONTEND ----------------
+# ---------------- SERVE UI ----------------
 @app.route("/")
-def home():
-    return send_from_directory(FRONTEND_FOLDER, "index.html")
-
-@app.route("/ui")
 def serve_ui():
     return send_from_directory(FRONTEND_FOLDER, "index.html")
 
-# Serve static files (CSS, JS, images)
-@app.route("/static/<path:path>")
-def serve_static(path):
+@app.route("/<path:path>")
+def serve_files(path):
     return send_from_directory(FRONTEND_FOLDER, path)
 
 # ---------------- ADD OWNER ----------------
@@ -56,7 +50,7 @@ def add_vehicle():
 
     cursor.execute(
         "INSERT INTO Vehicles (owner_id, vehicle_number, model, type) VALUES (?, ?, ?, ?)",
-        (data["owner_id"], data["vehicle_number"], data["model"], data.get("type", ""))
+        (data["owner_id"], data["vehicle_number"], data["model"], data["type"])
     )
 
     conn.commit()
@@ -72,35 +66,23 @@ def add_service():
 
     cursor.execute(
         "INSERT INTO Services (vehicle_id, service_date, description, cost, mechanic_id) VALUES (?, ?, ?, ?, ?)",
-        (
-            data["vehicle_id"],
-            data["service_date"],
-            data["description"],
-            data.get("cost", 0),
-            data.get("mechanic_id", 1)
-        )
+        (data["vehicle_id"], data["service_date"], data["description"], data["cost"], data["mechanic_id"])
     )
 
     conn.commit()
     conn.close()
     return jsonify({"message": "Service added successfully"})
 
-# ---------------- VIEW SERVICE HISTORY ----------------
+# ---------------- HISTORY ----------------
 @app.route("/service_history", methods=["GET"])
 def service_history():
     conn = get_db()
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT 
-            v.vehicle_number,
-            s.service_date,
-            s.description,
-            s.cost,
-            m.name AS mechanic
+        SELECT v.vehicle_number, s.service_date, s.description, s.cost
         FROM Services s
         JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
-        LEFT JOIN Mechanics m ON s.mechanic_id = m.mechanic_id
     """)
 
     rows = cursor.fetchall()
@@ -108,45 +90,29 @@ def service_history():
 
     return jsonify([dict(row) for row in rows])
 
-# ---------------- SEARCH VEHICLE ----------------
-@app.route("/search_vehicle/<vehicle_number>", methods=["GET"])
-def search_vehicle(vehicle_number):
-    conn = get_db()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT * FROM Vehicles 
-        WHERE vehicle_number LIKE ?
-    """, ('%' + vehicle_number + '%',))
-
-    rows = cursor.fetchall()
-    conn.close()
-
-    return jsonify([dict(row) for row in rows])
-
 # ---------------- DASHBOARD ----------------
-@app.route("/dashboard", methods=["GET"])
+@app.route("/dashboard")
 def dashboard():
     conn = get_db()
     cursor = conn.cursor()
 
+    cursor.execute("SELECT COUNT(*) FROM Owners")
+    owners = cursor.fetchone()[0]
+
     cursor.execute("SELECT COUNT(*) FROM Vehicles")
-    total_vehicles = cursor.fetchone()[0]
+    vehicles = cursor.fetchone()[0]
 
     cursor.execute("SELECT COUNT(*) FROM Services")
-    total_services = cursor.fetchone()[0]
-
-    cursor.execute("SELECT SUM(cost) FROM Services")
-    total_cost = cursor.fetchone()[0] or 0
+    services = cursor.fetchone()[0]
 
     conn.close()
 
     return jsonify({
-        "total_vehicles": total_vehicles,
-        "total_services": total_services,
-        "total_cost": total_cost
+        "owners": owners,
+        "vehicles": vehicles,
+        "services": services
     })
 
 # ---------------- RUN ----------------
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(debug=True)

@@ -9,28 +9,28 @@
 <div class="container">
     <h2>Add Vehicle</h2>
 
-    <input id="owner_id" placeholder="Owner ID"><br><br>
-    <input id="number" placeholder="Vehicle Number"><br><br>
-    <input id="model" placeholder="Model"><br><br>
-    <input id="type" placeholder="Type"><br><br>
+    <input id="owner_id" placeholder="Owner ID">
+    <input id="vehicle_number" placeholder="Vehicle Number">
+    <input id="model" placeholder="Model">
+    <input id="type" placeholder="Type">
 
-    <button onclick="addVehicle()">Add Vehicle</button>
+    <button onclick="addVehicle()">Submit</button>
 </div>
 
 <script>
-async function addVehicle() {
-    await fetch("/add_vehicle", {
+function addVehicle() {
+    fetch("/add_vehicle", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
-            owner_id: document.getElementById("owner_id").value,
-            vehicle_number: document.getElementById("number").value,
-            model: document.getElementById("model").value,
-            type: document.getElementById("type").value
+            owner_id: owner_id.value,
+            vehicle_number: vehicle_number.value,
+            model: model.value,
+            type: type.value
         })
-    });
-
-    alert("Vehicle Added ✅");
+    })
+    .then(res => res.json())
+    .then(data => alert(data.message));
 }
 </script>
 
