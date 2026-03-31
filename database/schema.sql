@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 CREATE TABLE Owners (
     owner_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
@@ -28,7 +27,8 @@ CREATE TABLE Services (
     service_date TEXT,
     description TEXT,
     cost REAL
-=======
+);
+
 CREATE TABLE Owners (
     owner_id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
@@ -58,5 +58,4 @@ CREATE TABLE Services (
     service_date TEXT,
     description TEXT,
     cost REAL
->>>>>>> a1442d9792a99537e7be3135ee40273a833bf3b2
 );
