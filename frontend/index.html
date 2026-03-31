@@ -1,38 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+<title>Dashboard</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
 
 <div class="navbar">
-    🚗 Vehicle Service System
-    <div>
-        <a href="add_owner.html">Add Owner</a>
-        <a href="add_vehicle.html">Add Vehicle</a>
-        <a href="add_service.html">Add Service</a>
-        <a href="view_history.html">History</a>
-    </div>
+🚗 Vehicle Service Tracker
+<a href="add_owner.html">Owner</a>
+<a href="add_vehicle.html">Vehicle</a>
+<a href="add_service.html">Service</a>
+<a href="view_history.html">History</a>
 </div>
 
 <div class="container">
-    <h1>Dashboard</h1>
+<h2>Dashboard</h2>
 
-    <div class="cards">
-        <div class="card">Owners: <span id="owners">0</span></div>
-        <div class="card">Vehicles: <span id="vehicles">0</span></div>
-        <div class="card">Services: <span id="services">0</span></div>
-    </div>
+<div class="cards">
+<div class="card">Owners: <span id="o"></span></div>
+<div class="card">Vehicles: <span id="v"></span></div>
+<div class="card">Services: <span id="s"></span></div>
+</div>
+
+<canvas id="chart"></canvas>
 </div>
 
 <script>
 fetch("/dashboard")
-.then(res => res.json())
-.then(data => {
-    document.getElementById("owners").innerText = data.owners;
-    document.getElementById("vehicles").innerText = data.vehicles;
-    document.getElementById("services").innerText = data.services;
+.then(r=>r.json())
+.then(d=>{
+o.innerText=d.owners;
+v.innerText=d.vehicles;
+s.innerText=d.services;
+
+new Chart(document.getElementById("chart"),{
+type:"bar",
+data:{
+labels:["Owners","Vehicles","Services"],
+datasets:[{data:[d.owners,d.vehicles,d.services]}]
+}
+});
 });
 </script>
 
