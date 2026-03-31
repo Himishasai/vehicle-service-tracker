@@ -1,95 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Add Service</title>
-
-    <style>
-        body {
-            font-family: Arial;
-            background: #f4f6f9;
-            margin: 0;
-        }
-
-        .container {
-            width: 400px;
-            margin: 80px auto;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-        }
-
-        h2 {
-            text-align: center;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #3498db;
-            border: none;
-            color: white;
-            font-size: 16px;
-            border-radius: 5px;
-        }
-
-        button:hover {
-            background: #2980b9;
-        }
-
-        a {
-            display: block;
-            margin-top: 10px;
-            text-align: center;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="container">
     <h2>Add Service</h2>
 
     <input type="number" id="vehicle_id" placeholder="Vehicle ID">
-    <input type="date" id="date">
     <input type="text" id="description" placeholder="Service Description">
-    <input type="number" id="cost" placeholder="Cost">
-    <input type="number" id="mechanic_id" placeholder="Mechanic ID">
+    <input type="date" id="service_date">
+    <input type="text" id="mechanic" placeholder="Mechanic Name">
 
-    <button onclick="addService()">Submit</button>
-
-    <a href="index.html">⬅ Back to Dashboard</a>
+    <button onclick="addService()">Add Service</button>
 </div>
 
 <script>
+const BASE_URL = "https://vehicle-service-tracker.onrender.com";
+
 function addService() {
-    fetch("http://127.0.0.1:5000/add_service", {
+    fetch(BASE_URL + "/add_service", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
             vehicle_id: document.getElementById("vehicle_id").value,
-            service_date: document.getElementById("date").value,
             description: document.getElementById("description").value,
-            cost: document.getElementById("cost").value,
-            mechanic_id: document.getElementById("mechanic_id").value
+            service_date: document.getElementById("service_date").value,
+            mechanic_name: document.getElementById("mechanic").value
         })
     })
     .then(res => res.json())
     .then(data => {
-        alert(data.message);
+        alert("Service Added Successfully 🔧");
+        document.getElementById("vehicle_id").value = "";
+        document.getElementById("description").value = "";
+        document.getElementById("service_date").value = "";
+        document.getElementById("mechanic").value = "";
     })
-    .catch(() => {
-        alert("Error connecting to backend");
-    });
+    .catch(() => alert("Error adding service ❌"));
 }
 </script>
 
