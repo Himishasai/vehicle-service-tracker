@@ -2,60 +2,35 @@
 <html>
 <head>
     <title>Add Vehicle</title>
-
-    <style>
-        body { font-family: Arial; background: #f4f6f9; }
-        .container {
-            width: 400px;
-            margin: 80px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        input {
-            width: 90%;
-            padding: 10px;
-            margin: 10px;
-        }
-        button {
-            padding: 10px 20px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <div class="container">
     <h2>Add Vehicle</h2>
 
-    <input id="owner_id" placeholder="Owner ID"><br>
-    <input id="vehicle_number" placeholder="Vehicle Number"><br>
-    <input id="model" placeholder="Model"><br>
+    <input id="owner_id" placeholder="Owner ID"><br><br>
+    <input id="number" placeholder="Vehicle Number"><br><br>
+    <input id="model" placeholder="Model"><br><br>
+    <input id="type" placeholder="Type"><br><br>
 
-    <button onclick="addVehicle()">Add Vehicle</button><br><br>
-
-    <a href="/ui">⬅ Back</a>
+    <button onclick="addVehicle()">Add Vehicle</button>
 </div>
 
 <script>
-function addVehicle() {
-    fetch("/add_vehicle", {
+async function addVehicle() {
+    await fetch("/add_vehicle", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
             owner_id: document.getElementById("owner_id").value,
-            vehicle_number: document.getElementById("vehicle_number").value,
-            model: document.getElementById("model").value
+            vehicle_number: document.getElementById("number").value,
+            model: document.getElementById("model").value,
+            type: document.getElementById("type").value
         })
-    })
-    .then(res => res.json())
-    .then(() => alert("Vehicle Added 🚗"))
-    .catch(() => alert("Error ❌"));
+    });
+
+    alert("Vehicle Added ✅");
 }
 </script>
 

@@ -2,41 +2,7 @@
 <html>
 <head>
     <title>Service History</title>
-
-    <style>
-        body {
-            font-family: Arial;
-            background: #f4f6f9;
-        }
-
-        .container {
-            width: 90%;
-            margin: auto;
-            margin-top: 40px;
-        }
-
-        input {
-            padding: 10px;
-            margin-bottom: 10px;
-            width: 300px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-
-        th, td {
-            padding: 12px;
-            border: 1px solid #ddd;
-        }
-
-        th {
-            background: #2c3e50;
-            color: white;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -44,11 +10,9 @@
 <div class="container">
     <h2>Service History</h2>
 
-    🔍 <input type="text" id="search" placeholder="Search by vehicle..." onkeyup="filterTable()">
+    <button onclick="loadHistory()">Load History</button>
 
-    <button onclick="loadData()">Load Data</button>
-
-    <table>
+    <table border="1" align="center">
         <thead>
             <tr>
                 <th>Vehicle</th>
@@ -58,47 +22,30 @@
                 <th>Mechanic</th>
             </tr>
         </thead>
-        <tbody id="historyTable"></tbody>
+        <tbody id="table"></tbody>
     </table>
 </div>
 
 <script>
-let fullData = [];
+async function loadHistory() {
+    const res = await fetch("/service_history");
+    const data = await res.json();
 
-function loadData() {
-    fetch("http://127.0.0.1:5000/service_history")
-    .then(res => res.json())
-    .then(data => {
-        fullData = data;
-        displayData(data);
-    });
-}
-
-function displayData(data) {
-    let table = document.getElementById("historyTable");
+    let table = document.getElementById("table");
     table.innerHTML = "";
 
-    data.forEach(row => {
-        table.innerHTML += `
-            <tr>
-                <td>${row.vehicle_number}</td>
-                <td>${row.service_date}</td>
-                <td>${row.description}</td>
-                <td>${row.cost}</td>
-                <td>${row.mechanic_name}</td>
-            </tr>
+    data.forEach(item => {
+        let row = `
+        <tr>
+            <td>${item.vehicle_number}</td>
+            <td>${item.service_date}</td>
+            <td>${item.description}</td>
+            <td>${item.cost}</td>
+            <td>${item.mechanic}</td>
+        </tr>
         `;
+        table.innerHTML += row;
     });
-}
-
-function filterTable() {
-    let search = document.getElementById("search").value.toLowerCase();
-
-    let filtered = fullData.filter(row =>
-        row.vehicle_number.toLowerCase().includes(search)
-    );
-
-    displayData(filtered);
 }
 </script>
 
