@@ -3,7 +3,7 @@ from flask_cors import CORS
 import sqlite3
 import os
 
-app = Flask(__name__, static_folder="../frontend")
+app = Flask(__name__)
 CORS(app)
 
 # ---------------- PATH SETUP ----------------
@@ -17,19 +17,18 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-# ---------------- HOME ----------------
+# ---------------- SERVE FRONTEND ----------------
 @app.route("/")
 def home():
-    return "Backend Running 🚀"
+    return send_from_directory(FRONTEND_FOLDER, "index.html")
 
-# ---------------- SERVE FRONTEND ----------------
 @app.route("/ui")
 def serve_ui():
     return send_from_directory(FRONTEND_FOLDER, "index.html")
 
-# Serve all frontend files (CSS, JS, other HTML)
-@app.route("/<path:path>")
-def serve_files(path):
+# Serve static files (CSS, JS, images)
+@app.route("/static/<path:path>")
+def serve_static(path):
     return send_from_directory(FRONTEND_FOLDER, path)
 
 # ---------------- ADD OWNER ----------------
@@ -57,7 +56,7 @@ def add_vehicle():
 
     cursor.execute(
         "INSERT INTO Vehicles (owner_id, vehicle_number, model, type) VALUES (?, ?, ?, ?)",
-        (data["owner_id"], data["vehicle_number"], data["model"], data["type"])
+        (data["owner_id"], data["vehicle_number"], data["model"], data.get("type", ""))
     )
 
     conn.commit()
@@ -73,7 +72,13 @@ def add_service():
 
     cursor.execute(
         "INSERT INTO Services (vehicle_id, service_date, description, cost, mechanic_id) VALUES (?, ?, ?, ?, ?)",
-        (data["vehicle_id"], data["service_date"], data["description"], data["cost"], data["mechanic_id"])
+        (
+            data["vehicle_id"],
+            data["service_date"],
+            data["description"],
+            data.get("cost", 0),
+            data.get("mechanic_id", 1)
+        )
     )
 
     conn.commit()
@@ -95,7 +100,7 @@ def service_history():
             m.name AS mechanic
         FROM Services s
         JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
-        JOIN Mechanics m ON s.mechanic_id = m.mechanic_id
+        LEFT JOIN Mechanics m ON s.mechanic_id = m.mechanic_id
     """)
 
     rows = cursor.fetchall()
@@ -119,7 +124,7 @@ def search_vehicle(vehicle_number):
 
     return jsonify([dict(row) for row in rows])
 
-# ---------------- DASHBOARD DATA ----------------
+# ---------------- DASHBOARD ----------------
 @app.route("/dashboard", methods=["GET"])
 def dashboard():
     conn = get_db()
