@@ -1,98 +1,65 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Service History</title>
-    <link rel="stylesheet" href="style.css">
-
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 10px;
-            border: 1px solid #ddd;
-            text-align: center;
-        }
-        th {
-            background: #3498db;
-            color: white;
-        }
-        tr:hover {
-            background: #f1f1f1;
-        }
-    </style>
+<title>History</title>
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
 <div class="container">
-    <h2>Service History</h2>
+<h2>Service History</h2>
 
-    <input id="search" placeholder="Search Vehicle..." onkeyup="searchVehicle()">
+<table>
+<thead>
+<tr>
+<th>ID</th><th>Vehicle</th><th>Date</th><th>Description</th><th>Cost</th><th>Action</th>
+</tr>
+</thead>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Vehicle</th>
-                <th>Date</th>
-                <th>Description</th>
-                <th>Cost</th>
-            </tr>
-        </thead>
-        <tbody id="historyTable"></tbody>
-    </table>
+<tbody id="t"></tbody>
+</table>
 </div>
 
 <script>
-// Load data
-function loadHistory() {
-    fetch("/service_history")
-    .then(res => res.json())
-    .then(data => {
-        let table = document.getElementById("historyTable");
-        table.innerHTML = "";
-
-        data.forEach(item => {
-            let row = `
-                <tr>
-                    <td>${item.vehicle_number}</td>
-                    <td>${item.service_date}</td>
-                    <td>${item.description}</td>
-                    <td>₹${item.cost}</td>
-                </tr>
-            `;
-            table.innerHTML += row;
-        });
-    });
+function load(){
+fetch("/service_history")
+.then(r=>r.json())
+.then(d=>{
+t.innerHTML="";
+d.forEach(x=>{
+t.innerHTML+=`
+<tr>
+<td>${x.service_id}</td>
+<td>${x.vehicle_number}</td>
+<td>${x.service_date}</td>
+<td>${x.description}</td>
+<td>${x.cost}</td>
+<td>
+<button onclick="del(${x.service_id})">Delete</button>
+<button onclick="edit(${x.service_id})">Edit</button>
+</td>
+</tr>`;
+});
+});
 }
 
-// Search
-function searchVehicle() {
-    let input = document.getElementById("search").value;
-
-    fetch(`/search_vehicle/${input}`)
-    .then(res => res.json())
-    .then(data => {
-        let table = document.getElementById("historyTable");
-        table.innerHTML = "";
-
-        data.forEach(item => {
-            let row = `
-                <tr>
-                    <td>${item.vehicle_number}</td>
-                    <td>-</td>
-                    <td>-</td>
-                    <td>-</td>
-                </tr>
-            `;
-            table.innerHTML += row;
-        });
-    });
+function del(id){
+fetch("/delete_service/"+id,{method:"DELETE"})
+.then(()=>{alert("Deleted");load();});
 }
 
-// Load on start
-loadHistory();
+function edit(id){
+let d=prompt("New desc");
+let c=prompt("Cost");
+fetch("/update_service/"+id,{
+method:"PUT",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({description:d,cost:c})
+}).then(()=>{alert("Updated");load();});
+}
+
+load();
 </script>
 
 </body>
