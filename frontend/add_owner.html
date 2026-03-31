@@ -1,53 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>Add Owner</title>
 
     <style>
-        body {
-            font-family: Arial;
-            background: #f4f6f9;
-            margin: 0;
-        }
-
+        body { font-family: Arial; background: #f4f6f9; }
         .container {
             width: 400px;
             margin: 80px auto;
             background: white;
-            padding: 25px;
+            padding: 20px;
             border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
-        }
-
-        h2 {
             text-align: center;
         }
-
         input {
-            width: 100%;
+            width: 90%;
             padding: 10px;
-            margin: 10px 0;
+            margin: 10px;
         }
-
         button {
-            width: 100%;
-            padding: 10px;
+            padding: 10px 20px;
             background: #1abc9c;
-            border: none;
             color: white;
-            font-size: 16px;
+            border: none;
             border-radius: 5px;
-        }
-
-        button:hover {
-            background: #16a085;
-        }
-
-        a {
-            display: block;
-            margin-top: 10px;
-            text-align: center;
         }
     </style>
 </head>
@@ -57,22 +33,20 @@
 <div class="container">
     <h2>Add Owner</h2>
 
-    <input type="text" id="name" placeholder="Owner Name">
-    <input type="text" id="phone" placeholder="Phone Number">
-    <input type="text" id="address" placeholder="Address">
+    <input id="name" placeholder="Name"><br>
+    <input id="phone" placeholder="Phone"><br>
+    <input id="address" placeholder="Address"><br>
 
-    <button onclick="addOwner()">Submit</button>
+    <button onclick="addOwner()">Add Owner</button><br><br>
 
-    <a href="index.html">⬅ Back to Dashboard</a>
+    <a href="/ui">⬅ Back</a>
 </div>
 
 <script>
 function addOwner() {
-    fetch("http://127.0.0.1:5000/add_owner", {
+    fetch("/add_owner", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
             name: document.getElementById("name").value,
             phone: document.getElementById("phone").value,
@@ -80,12 +54,8 @@ function addOwner() {
         })
     })
     .then(res => res.json())
-    .then(data => {
-        alert(data.message);
-    })
-    .catch(() => {
-        alert("Error connecting to backend");
-    });
+    .then(() => alert("Owner Added ✅"))
+    .catch(() => alert("Error ❌"));
 }
 </script>
 
