@@ -11,16 +11,14 @@
 
     <input type="number" id="owner_id" placeholder="Owner ID">
     <input type="text" id="vehicle_number" placeholder="Vehicle Number">
-    <input type="text" id="model" placeholder="Vehicle Model">
+    <input type="text" id="model" placeholder="Model">
 
     <button onclick="addVehicle()">Add Vehicle</button>
 </div>
 
 <script>
-const BASE_URL = "https://vehicle-service-tracker.onrender.com";
-
 function addVehicle() {
-    fetch(BASE_URL + "/add_vehicle", {
+    fetch("/add_vehicle", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
@@ -30,13 +28,8 @@ function addVehicle() {
         })
     })
     .then(res => res.json())
-    .then(data => {
-        alert("Vehicle Added Successfully 🚗");
-        document.getElementById("owner_id").value = "";
-        document.getElementById("vehicle_number").value = "";
-        document.getElementById("model").value = "";
-    })
-    .catch(() => alert("Error adding vehicle ❌"));
+    .then(data => alert(data.message))
+    .catch(() => alert("Error ❌"));
 }
 </script>
 
