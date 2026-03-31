@@ -7,7 +7,8 @@ DB_PATH = os.path.join(BASE_DIR, "../database/vehicle.db")
 conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
-# Create tables
+# ---------------- CREATE TABLES ----------------
+
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS Owners (
     owner_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,7 +48,33 @@ CREATE TABLE IF NOT EXISTS Services (
 )
 """)
 
+# ---------------- SAMPLE DATA ----------------
+
+# Owner
+cursor.execute("""
+INSERT INTO Owners (name, phone, address)
+VALUES ('Rahul', '9876543210', 'Chennai')
+""")
+
+# Vehicle
+cursor.execute("""
+INSERT INTO Vehicles (owner_id, vehicle_number, model, type)
+VALUES (1, 'TN01AB1234', 'Honda Activa', 'Bike')
+""")
+
+# Mechanic
+cursor.execute("""
+INSERT INTO Mechanics (name, phone, garage_name)
+VALUES ('Kumar', '9123456780', 'Kumar Garage')
+""")
+
+# Service
+cursor.execute("""
+INSERT INTO Services (vehicle_id, mechanic_id, service_date, description, cost)
+VALUES (1, 1, '2026-04-01', 'Oil Change', 500)
+""")
+
 conn.commit()
 conn.close()
 
-print("Database created successfully ✅")
+print("Database created with sample data ✅")
