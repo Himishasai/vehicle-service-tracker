@@ -36,8 +36,8 @@ t.innerHTML+=`
 <td>${x.description}</td>
 <td>${x.cost}</td>
 <td>
-<button onclick="del(${x.service_id})">Delete</button>
-<button onclick="edit(${x.service_id})">Edit</button>
+<button style="background:#ff4d4d" onclick="del(${x.service_id})">Delete</button>
+<button style="background:#4dff88" onclick="edit(${x.service_id})">Edit</button>
 </td>
 </tr>`;
 });
@@ -50,8 +50,8 @@ fetch("/delete_service/"+id,{method:"DELETE"})
 }
 
 function edit(id){
-let d=prompt("New desc");
-let c=prompt("Cost");
+let d=prompt("New description");
+let c=prompt("New cost");
 fetch("/update_service/"+id,{
 method:"PUT",
 headers:{"Content-Type":"application/json"},
