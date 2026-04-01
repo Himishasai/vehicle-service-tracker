@@ -15,7 +15,7 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-# ---------------- FRONTEND ----------------
+# ---------- FRONTEND ----------
 @app.route("/")
 def home():
     return send_from_directory(FRONTEND, "index.html")
@@ -24,7 +24,7 @@ def home():
 def static_files(path):
     return send_from_directory(FRONTEND, path)
 
-# ---------------- ADD ----------------
+# ---------- ADD ----------
 @app.route("/add_owner", methods=["POST"])
 def add_owner():
     data = request.json
@@ -55,7 +55,7 @@ def add_service():
     conn.close()
     return jsonify({"message": "Service added"})
 
-# ---------------- VIEW ----------------
+# ---------- VIEW ----------
 @app.route("/service_history")
 def history():
     conn = get_db()
@@ -67,7 +67,7 @@ def history():
     conn.close()
     return jsonify([dict(x) for x in data])
 
-# ---------------- DELETE ----------------
+# ---------- DELETE ----------
 @app.route("/delete_service/<int:id>", methods=["DELETE"])
 def delete_service(id):
     conn = get_db()
@@ -76,7 +76,7 @@ def delete_service(id):
     conn.close()
     return jsonify({"message": "Deleted"})
 
-# ---------------- UPDATE ----------------
+# ---------- UPDATE ----------
 @app.route("/update_service/<int:id>", methods=["PUT"])
 def update_service(id):
     data = request.json
@@ -87,7 +87,7 @@ def update_service(id):
     conn.close()
     return jsonify({"message": "Updated"})
 
-# ---------------- SEARCH ----------------
+# ---------- SEARCH ----------
 @app.route("/search_vehicle/<v>")
 def search(v):
     conn = get_db()
@@ -95,7 +95,7 @@ def search(v):
     conn.close()
     return jsonify([dict(x) for x in data])
 
-# ---------------- DASHBOARD ----------------
+# ---------- DASHBOARD ----------
 @app.route("/dashboard")
 def dashboard():
     conn = get_db()
