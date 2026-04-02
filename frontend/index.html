@@ -1,105 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Vehicle Service Tracker</title>
+<title>Vehicle Tracker Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
-    font-family: Arial;
-    margin: 0;
-    background: linear-gradient(to right, #1e3c72, #2a5298);
-    color: white;
-}
-
-/* NAVBAR */
-.navbar {
-    background: #0d1b2a;
-    padding: 15px;
-    display: flex;
-    gap: 20px;
-}
-
-.navbar button {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-}
-
-/* SECTIONS */
-.container { padding: 20px; }
-.section { display: none; }
-
-/* DASHBOARD */
-.dashboard {
-    display: flex;
-    gap: 20px;
-}
-.card {
-    flex: 1;
-    background: #1d3557;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-}
-
-/* FORM */
-input {
-    padding: 10px;
-    margin: 5px;
-}
-button {
-    padding: 10px;
-    background: #457b9d;
-    color: white;
-    border: none;
-}
-
-/* TABLE */
-table {
-    width: 100%;
-    margin-top: 20px;
-    background: white;
-    color: black;
-}
+body {margin:0;font-family:Arial;background:linear-gradient(to right,#1e3c72,#2a5298);color:white;}
+.navbar {background:#0d1b2a;padding:15px;display:flex;gap:20px;}
+.navbar button {background:none;border:none;color:white;cursor:pointer;font-size:16px;}
+.section {display:none;padding:20px;}
+.dashboard {display:flex;gap:20px;}
+.card {flex:1;background:#1d3557;padding:20px;border-radius:10px;text-align:center;}
+input,select {padding:10px;margin:5px;}
+button {padding:10px;background:#457b9d;color:white;border:none;cursor:pointer;}
+table {width:100%;background:white;color:black;margin-top:20px;}
 </style>
-
 </head>
 
 <body>
 
 <div class="navbar">
-    <button onclick="show('dashboard')">Dashboard</button>
-    <button onclick="show('owner')">Owner</button>
-    <button onclick="show('vehicle')">Vehicle</button>
-    <button onclick="show('service')">Service</button>
-    <button onclick="show('history')">History</button>
+<button onclick="showSection('dashboard')">Dashboard</button>
+<button onclick="showSection('owner')">Owner</button>
+<button onclick="showSection('vehicle')">Vehicle</button>
+<button onclick="showSection('service')">Service</button>
+<button onclick="showSection('history')">History</button>
 </div>
-
-<div class="container">
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="section">
-    <h2>Dashboard</h2>
-    <div class="dashboard">
-        <div class="card">Owners: <span id="ownersCount">0</span></div>
-        <div class="card">Vehicles: <span id="vehiclesCount">0</span></div>
-        <div class="card">Services: <span id="servicesCount">0</span></div>
-    </div>
+<h2>Dashboard</h2>
+<div class="dashboard">
+<div class="card">Owners: <span id="ownersCount">0</span></div>
+<div class="card">Vehicles: <span id="vehiclesCount">0</span></div>
+<div class="card">Services: <span id="servicesCount">0</span></div>
+</div>
+<canvas id="chart"></canvas>
 </div>
 
 <!-- OWNER -->
 <div id="owner" class="section">
 <h2>Add Owner</h2>
+
 <input id="name" placeholder="Name">
 <input id="phone" placeholder="Phone">
 <input id="address" placeholder="Address">
+
 <button onclick="addOwner()">Add Owner</button>
 
-<h3>Owner List</h3>
 <table>
-<thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Address</th></tr></thead>
+<thead>
+<tr><th>ID</th><th>Name</th><th>Phone</th><th>Address</th><th>Action</th></tr>
+</thead>
 <tbody id="ownerTable"></tbody>
 </table>
 </div>
@@ -107,26 +59,31 @@ table {
 <!-- VEHICLE -->
 <div id="vehicle" class="section">
 <h2>Add Vehicle</h2>
-<input id="owner_id" placeholder="Owner ID">
+
+<select id="ownerDropdown"></select>
 <input id="vehicle_number" placeholder="Vehicle Number">
 <input id="model" placeholder="Model">
 <input id="type" placeholder="Type">
+
 <button onclick="addVehicle()">Add Vehicle</button>
 </div>
 
 <!-- SERVICE -->
 <div id="service" class="section">
 <h2>Add Service</h2>
-<input id="vehicle_id" placeholder="Vehicle ID">
+
+<select id="vehicleDropdown"></select>
 <input id="date" placeholder="Date">
 <input id="desc" placeholder="Description">
 <input id="cost" placeholder="Cost">
+
 <button onclick="addService()">Add Service</button>
 </div>
 
 <!-- HISTORY -->
 <div id="history" class="section">
 <h2>Service History</h2>
+
 <table>
 <thead>
 <tr><th>ID</th><th>Vehicle</th><th>Date</th><th>Description</th><th>Cost</th></tr>
@@ -135,27 +92,36 @@ table {
 </table>
 </div>
 
-</div>
-
 <script>
 
 // -------- NAVIGATION --------
-function show(id){
-    document.querySelectorAll(".section").forEach(s => s.style.display="none");
-    document.getElementById(id).style.display="block";
+function showSection(id){
+document.querySelectorAll(".section").forEach(s => s.style.display="none");
+document.getElementById(id).style.display="block";
 }
 
 // -------- OWNER --------
 function addOwner(){
+    const name = document.getElementById("name").value;
+    const phone = document.getElementById("phone").value;
+    const address = document.getElementById("address").value;
+
+    if(!name || !phone || !address){
+        alert("Fill all fields");
+        return;
+    }
+
     fetch("/add_owner", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({
-            name: document.getElementById("name").value,
-            phone: document.getElementById("phone").value,
-            address: document.getElementById("address").value
-        })
-    }).then(()=>loadOwners());
+        body: JSON.stringify({name, phone, address})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        alert(data.message);
+        loadOwners();
+        loadDashboard();
+    });
 }
 
 function loadOwners(){
@@ -163,45 +129,95 @@ function loadOwners(){
     .then(res=>res.json())
     .then(data=>{
         let rows="";
+        let dropdown="";
+
         data.forEach(o=>{
-            rows += `<tr>
+            rows+=`<tr>
             <td>${o.owner_id}</td>
             <td>${o.name}</td>
             <td>${o.phone}</td>
             <td>${o.address}</td>
+            <td><button onclick="deleteOwner(${o.owner_id})">Delete</button></td>
             </tr>`;
+
+            dropdown+=`<option value="${o.owner_id}">${o.name}</option>`;
         });
+
         document.getElementById("ownerTable").innerHTML = rows;
+        document.getElementById("ownerDropdown").innerHTML = dropdown;
+    });
+}
+
+function deleteOwner(id){
+    fetch("/delete_owner/"+id,{method:"DELETE"})
+    .then(()=>{
+        loadOwners();
+        loadDashboard();
     });
 }
 
 // -------- VEHICLE --------
 function addVehicle(){
+    const owner_id = document.getElementById("ownerDropdown").value;
+    const vehicle_number = document.getElementById("vehicle_number").value;
+    const model = document.getElementById("model").value;
+    const type = document.getElementById("type").value;
+
+    if(!owner_id || !vehicle_number || !model || !type){
+        alert("Fill all fields");
+        return;
+    }
+
     fetch("/add_vehicle", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({
-            owner_id: document.getElementById("owner_id").value,
-            vehicle_number: document.getElementById("vehicle_number").value,
-            model: document.getElementById("model").value,
-            type: document.getElementById("type").value
-        })
-    }).then(()=>alert("Vehicle Added"));
+        body: JSON.stringify({owner_id, vehicle_number, model, type})
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        alert(data.message);
+        loadVehicles();
+        loadDashboard();
+    });
+}
+
+function loadVehicles(){
+    fetch("/get_vehicles")
+    .then(res=>res.json())
+    .then(data=>{
+        let dropdown="";
+        data.forEach(v=>{
+            dropdown+=`<option value="${v.vehicle_id}">${v.vehicle_number}</option>`;
+        });
+        document.getElementById("vehicleDropdown").innerHTML = dropdown;
+    });
 }
 
 // -------- SERVICE --------
 function addService(){
+    const vehicle_id = document.getElementById("vehicleDropdown").value;
+    const date = document.getElementById("date").value;
+    const desc = document.getElementById("desc").value;
+    const cost = document.getElementById("cost").value;
+
+    if(!vehicle_id || !date || !desc || !cost){
+        alert("Fill all fields");
+        return;
+    }
+
     fetch("/add_service", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body: JSON.stringify({
-            vehicle_id: document.getElementById("vehicle_id").value,
-            service_date: document.getElementById("date").value,
-            description: document.getElementById("desc").value,
-            cost: document.getElementById("cost").value
+            vehicle_id,
+            service_date: date,
+            description: desc,
+            cost
         })
-    }).then(()=>{
-        alert("Service Added");
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        alert(data.message);
         loadHistory();
         loadDashboard();
     });
@@ -214,7 +230,7 @@ function loadHistory(){
     .then(data=>{
         let rows="";
         data.forEach(h=>{
-            rows += `<tr>
+            rows+=`<tr>
             <td>${h.service_id}</td>
             <td>${h.vehicle_number}</td>
             <td>${h.service_date}</td>
@@ -227,6 +243,7 @@ function loadHistory(){
 }
 
 // -------- DASHBOARD --------
+let chart;
 function loadDashboard(){
     fetch("/dashboard")
     .then(res=>res.json())
@@ -234,12 +251,23 @@ function loadDashboard(){
         document.getElementById("ownersCount").innerText = d.owners;
         document.getElementById("vehiclesCount").innerText = d.vehicles;
         document.getElementById("servicesCount").innerText = d.services;
+
+        if(chart) chart.destroy();
+
+        chart = new Chart(document.getElementById("chart"), {
+            type:"bar",
+            data:{
+                labels:["Owners","Vehicles","Services"],
+                datasets:[{data:[d.owners,d.vehicles,d.services]}]
+            }
+        });
     });
 }
 
 // -------- INIT --------
-show("dashboard");
+showSection("dashboard");
 loadOwners();
+loadVehicles();
 loadHistory();
 loadDashboard();
 
