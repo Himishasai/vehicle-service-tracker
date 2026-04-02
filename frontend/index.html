@@ -1,55 +1,248 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <title>Service Tracker</title>
-    <link rel="stylesheet" href="style.css">
+<title>Vehicle Service Tracker</title>
+
+<style>
+body {
+    font-family: Arial;
+    margin: 0;
+    background: linear-gradient(to right, #1e3c72, #2a5298);
+    color: white;
+}
+
+/* NAVBAR */
+.navbar {
+    background: #0d1b2a;
+    padding: 15px;
+    display: flex;
+    gap: 20px;
+}
+
+.navbar button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* SECTIONS */
+.container { padding: 20px; }
+.section { display: none; }
+
+/* DASHBOARD */
+.dashboard {
+    display: flex;
+    gap: 20px;
+}
+.card {
+    flex: 1;
+    background: #1d3557;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+/* FORM */
+input {
+    padding: 10px;
+    margin: 5px;
+}
+button {
+    padding: 10px;
+    background: #457b9d;
+    color: white;
+    border: none;
+}
+
+/* TABLE */
+table {
+    width: 100%;
+    margin-top: 20px;
+    background: white;
+    color: black;
+}
+</style>
+
 </head>
 
 <body>
 
 <div class="navbar">
-    🚗 Service Tracker
-    <div>
-        <a href="index.html">Dashboard</a>
-        <a href="add_owner.html">Owner</a>
-        <a href="add_vehicle.html">Vehicle</a>
-        <a href="add_service.html">Service</a>
-        <a href="view_history.html">History</a>
-    </div>
+    <button onclick="show('dashboard')">Dashboard</button>
+    <button onclick="show('owner')">Owner</button>
+    <button onclick="show('vehicle')">Vehicle</button>
+    <button onclick="show('service')">Service</button>
+    <button onclick="show('history')">History</button>
 </div>
 
 <div class="container">
 
-    <h1>Dashboard</h1>
-
-    <div class="cards">
-        <div class="card">
-            <h3>Total Vehicles</h3>
-            <p id="vehicles">0</p>
-        </div>
-
-        <div class="card">
-            <h3>Total Services</h3>
-            <p id="services">0</p>
-        </div>
-
-        <div class="card">
-            <h3>Total Cost</h3>
-            <p id="cost">₹0</p>
-        </div>
+<!-- DASHBOARD -->
+<div id="dashboard" class="section">
+    <h2>Dashboard</h2>
+    <div class="dashboard">
+        <div class="card">Owners: <span id="ownersCount">0</span></div>
+        <div class="card">Vehicles: <span id="vehiclesCount">0</span></div>
+        <div class="card">Services: <span id="servicesCount">0</span></div>
     </div>
+</div>
+
+<!-- OWNER -->
+<div id="owner" class="section">
+<h2>Add Owner</h2>
+<input id="name" placeholder="Name">
+<input id="phone" placeholder="Phone">
+<input id="address" placeholder="Address">
+<button onclick="addOwner()">Add Owner</button>
+
+<h3>Owner List</h3>
+<table>
+<thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Address</th></tr></thead>
+<tbody id="ownerTable"></tbody>
+</table>
+</div>
+
+<!-- VEHICLE -->
+<div id="vehicle" class="section">
+<h2>Add Vehicle</h2>
+<input id="owner_id" placeholder="Owner ID">
+<input id="vehicle_number" placeholder="Vehicle Number">
+<input id="model" placeholder="Model">
+<input id="type" placeholder="Type">
+<button onclick="addVehicle()">Add Vehicle</button>
+</div>
+
+<!-- SERVICE -->
+<div id="service" class="section">
+<h2>Add Service</h2>
+<input id="vehicle_id" placeholder="Vehicle ID">
+<input id="date" placeholder="Date">
+<input id="desc" placeholder="Description">
+<input id="cost" placeholder="Cost">
+<button onclick="addService()">Add Service</button>
+</div>
+
+<!-- HISTORY -->
+<div id="history" class="section">
+<h2>Service History</h2>
+<table>
+<thead>
+<tr><th>ID</th><th>Vehicle</th><th>Date</th><th>Description</th><th>Cost</th></tr>
+</thead>
+<tbody id="historyTable"></tbody>
+</table>
+</div>
 
 </div>
 
 <script>
-fetch("/dashboard")
-.then(res => res.json())
-.then(data => {
-    document.getElementById("vehicles").innerText = data.total_vehicles;
-    document.getElementById("services").innerText = data.total_services;
-    document.getElementById("cost").innerText = "₹" + data.total_cost;
-})
-.catch(() => alert("Backend not running!"));
+
+// -------- NAVIGATION --------
+function show(id){
+    document.querySelectorAll(".section").forEach(s => s.style.display="none");
+    document.getElementById(id).style.display="block";
+}
+
+// -------- OWNER --------
+function addOwner(){
+    fetch("/add_owner", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+            name: document.getElementById("name").value,
+            phone: document.getElementById("phone").value,
+            address: document.getElementById("address").value
+        })
+    }).then(()=>loadOwners());
+}
+
+function loadOwners(){
+    fetch("/get_owners")
+    .then(res=>res.json())
+    .then(data=>{
+        let rows="";
+        data.forEach(o=>{
+            rows += `<tr>
+            <td>${o.owner_id}</td>
+            <td>${o.name}</td>
+            <td>${o.phone}</td>
+            <td>${o.address}</td>
+            </tr>`;
+        });
+        document.getElementById("ownerTable").innerHTML = rows;
+    });
+}
+
+// -------- VEHICLE --------
+function addVehicle(){
+    fetch("/add_vehicle", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+            owner_id: document.getElementById("owner_id").value,
+            vehicle_number: document.getElementById("vehicle_number").value,
+            model: document.getElementById("model").value,
+            type: document.getElementById("type").value
+        })
+    }).then(()=>alert("Vehicle Added"));
+}
+
+// -------- SERVICE --------
+function addService(){
+    fetch("/add_service", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+            vehicle_id: document.getElementById("vehicle_id").value,
+            service_date: document.getElementById("date").value,
+            description: document.getElementById("desc").value,
+            cost: document.getElementById("cost").value
+        })
+    }).then(()=>{
+        alert("Service Added");
+        loadHistory();
+        loadDashboard();
+    });
+}
+
+// -------- HISTORY --------
+function loadHistory(){
+    fetch("/history")
+    .then(res=>res.json())
+    .then(data=>{
+        let rows="";
+        data.forEach(h=>{
+            rows += `<tr>
+            <td>${h.service_id}</td>
+            <td>${h.vehicle_number}</td>
+            <td>${h.service_date}</td>
+            <td>${h.description}</td>
+            <td>${h.cost}</td>
+            </tr>`;
+        });
+        document.getElementById("historyTable").innerHTML = rows;
+    });
+}
+
+// -------- DASHBOARD --------
+function loadDashboard(){
+    fetch("/dashboard")
+    .then(res=>res.json())
+    .then(d=>{
+        document.getElementById("ownersCount").innerText = d.owners;
+        document.getElementById("vehiclesCount").innerText = d.vehicles;
+        document.getElementById("servicesCount").innerText = d.services;
+    });
+}
+
+// -------- INIT --------
+show("dashboard");
+loadOwners();
+loadHistory();
+loadDashboard();
+
 </script>
 
 </body>
