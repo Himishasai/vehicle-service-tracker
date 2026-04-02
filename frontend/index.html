@@ -5,15 +5,99 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {margin:0;font-family:Arial;background:linear-gradient(to right,#1e3c72,#2a5298);color:white;}
-.navbar {background:#0d1b2a;padding:15px;display:flex;gap:20px;}
-.navbar button {background:none;border:none;color:white;cursor:pointer;font-size:16px;}
+body {
+margin:0;
+font-family:Arial;
+background:linear-gradient(to right,#0f2027,#203a43,#2c5364);
+color:white;
+}
+
+.navbar {
+background:rgba(0,0,0,0.5);
+padding:15px;
+display:flex;
+gap:20px;
+backdrop-filter:blur(10px);
+}
+
+.navbar button {
+background:none;
+border:none;
+color:white;
+font-size:16px;
+cursor:pointer;
+}
+
 .section {display:none;padding:20px;}
+
 .dashboard {display:flex;gap:20px;}
-.card {flex:1;background:#1d3557;padding:20px;border-radius:10px;text-align:center;}
-input,select {padding:10px;margin:5px;}
-button {padding:10px;background:#457b9d;color:white;border:none;cursor:pointer;margin:2px;}
-table {width:100%;background:white;color:black;margin-top:20px;}
+
+.card {
+flex:1;
+background:rgba(255,255,255,0.1);
+padding:20px;
+border-radius:15px;
+text-align:center;
+backdrop-filter:blur(10px);
+}
+
+input,select {
+padding:10px;
+margin:5px;
+border:none;
+border-radius:8px;
+}
+
+button {
+padding:8px 12px;
+background:#00b4d8;
+border:none;
+color:white;
+border-radius:6px;
+cursor:pointer;
+}
+
+button:hover {background:#0077b6;}
+
+table {
+width:100%;
+background:white;
+color:black;
+margin-top:20px;
+border-radius:10px;
+overflow:hidden;
+}
+
+th {background:#0077b6;color:white;padding:10px;}
+td {padding:8px;text-align:center;}
+
+.search {
+padding:10px;
+width:300px;
+border-radius:8px;
+border:none;
+}
+
+/* MODAL */
+.modal {
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.7);
+justify-content:center;
+align-items:center;
+}
+
+.modal-box {
+background:white;
+color:black;
+padding:20px;
+border-radius:10px;
+width:300px;
+}
 </style>
 </head>
 
@@ -40,72 +124,79 @@ table {width:100%;background:white;color:black;margin-top:20px;}
 
 <!-- OWNER -->
 <div id="owner" class="section">
-<h2>Owner Management</h2>
+<h2>Owner</h2>
 
 <input id="name" placeholder="Name">
 <input id="phone" placeholder="Phone">
 <input id="address" placeholder="Address">
+<button onclick="addOwner()">Add</button>
 
-<button onclick="addOwner()">Add Owner</button>
+<br><input class="search" placeholder="Search Owner..." onkeyup="searchOwner(this.value)">
 
 <table>
-<thead>
-<tr><th>ID</th><th>Name</th><th>Phone</th><th>Address</th><th>Action</th></tr>
-</thead>
+<thead><tr><th>ID</th><th>Name</th><th>Phone</th><th>Address</th><th>Action</th></tr></thead>
 <tbody id="ownerTable"></tbody>
 </table>
 </div>
 
 <!-- VEHICLE -->
 <div id="vehicle" class="section">
-<h2>Vehicle Management</h2>
+<h2>Vehicle</h2>
 
 <select id="ownerDropdown"></select>
-<input id="vehicle_number" placeholder="Vehicle Number">
+<input id="vehicle_number" placeholder="Number">
 <input id="model" placeholder="Model">
 <input id="type" placeholder="Type">
+<button onclick="addVehicle()">Add</button>
 
-<button onclick="addVehicle()">Add Vehicle</button>
+<br><input class="search" placeholder="Search Vehicle..." onkeyup="searchVehicle(this.value)">
 
 <table>
-<thead>
-<tr><th>ID</th><th>Owner</th><th>Number</th><th>Model</th><th>Type</th><th>Action</th></tr>
-</thead>
+<thead><tr><th>ID</th><th>Owner</th><th>Number</th><th>Model</th><th>Type</th><th>Action</th></tr></thead>
 <tbody id="vehicleTable"></tbody>
 </table>
 </div>
 
 <!-- SERVICE -->
 <div id="service" class="section">
-<h2>Service Management</h2>
+<h2>Service</h2>
 
 <select id="vehicleDropdown"></select>
 <input id="date" placeholder="Date">
 <input id="desc" placeholder="Description">
 <input id="cost" placeholder="Cost">
+<button onclick="addService()">Add</button>
 
-<button onclick="addService()">Add Service</button>
+<br><input class="search" placeholder="Search Service..." onkeyup="searchService(this.value)">
 
 <table>
-<thead>
-<tr><th>ID</th><th>Vehicle</th><th>Date</th><th>Description</th><th>Cost</th><th>Action</th></tr>
-</thead>
+<thead><tr><th>ID</th><th>Vehicle</th><th>Date</th><th>Description</th><th>Cost</th><th>Action</th></tr></thead>
 <tbody id="serviceTable"></tbody>
 </table>
 </div>
 
 <!-- HISTORY -->
 <div id="history" class="section">
-<h2>Service History</h2>
+<h2>History</h2>
 <table>
-<thead>
-<tr><th>ID</th><th>Vehicle</th><th>Date</th><th>Description</th><th>Cost</th></tr>
-</thead>
+<thead><tr><th>ID</th><th>Vehicle</th><th>Date</th><th>Description</th><th>Cost</th></tr></thead>
 <tbody id="historyTable"></tbody>
 </table>
 </div>
 
+<!-- MODAL -->
+<div class="modal" id="modal">
+<div class="modal-box">
+<h3>Edit</h3>
+<input id="m1"><input id="m2"><input id="m3"><input id="m4">
+<button onclick="saveEdit()">Save</button>
+<button onclick="closeModal()">Close</button>
+</div>
+</div>
+
 <script>
+
+let editType="",editId="";
 
 // NAV
 function showSection(id){
@@ -115,57 +206,44 @@ document.getElementById(id).style.display="block";
 
 // -------- OWNER --------
 function addOwner(){
+let nameVal = document.getElementById("name").value;
+let phoneVal = document.getElementById("phone").value;
+let addressVal = document.getElementById("address").value;
+
+if(!nameVal || !phoneVal || !addressVal){
+alert("Fill all fields");
+return;
+}
+
 fetch("/add_owner",{method:"POST",headers:{"Content-Type":"application/json"},
-body:JSON.stringify({name:name.value,phone:phone.value,address:address.value})})
-.then(()=>{loadOwners();loadDashboard();});
+body:JSON.stringify({name:nameVal,phone:phoneVal,address:addressVal})})
+.then(()=>{
+document.getElementById("name").value="";
+document.getElementById("phone").value="";
+document.getElementById("address").value="";
+loadOwners();
+loadDashboard();
+});
 }
 
 function loadOwners(){
-fetch("/get_owners")
-.then(res=>res.json())
-.then(data=>{
+fetch("/get_owners").then(r=>r.json()).then(data=>{
 let rows="",dd="";
 data.forEach(o=>{
-rows+=`
-<tr>
+rows+=`<tr>
 <td>${o.owner_id}</td>
-
-<td id="on-${o.owner_id}">${o.name}</td>
-<td id="op-${o.owner_id}">${o.phone}</td>
-<td id="oa-${o.owner_id}">${o.address}</td>
-
+<td>${o.name}</td>
+<td>${o.phone}</td>
+<td>${o.address}</td>
 <td>
-<button onclick="enableOwner(${o.owner_id})">Edit</button>
-<button onclick="saveOwner(${o.owner_id})">Save</button>
+<button onclick="openEdit('owner',${o.owner_id},'${o.name}','${o.phone}','${o.address}')">Edit</button>
 <button onclick="deleteOwner(${o.owner_id})">Delete</button>
-</td>
-</tr>`;
+</td></tr>`;
 dd+=`<option value="${o.owner_id}">${o.name}</option>`;
 });
 ownerTable.innerHTML=rows;
 ownerDropdown.innerHTML=dd;
 });
-}
-
-function enableOwner(id){
-["on","op","oa"].forEach(f=>{
-let el=document.getElementById(f+"-"+id);
-el.contentEditable=true;
-el.style.background="#fff3cd";
-});
-}
-
-function saveOwner(id){
-fetch("/update_owner/"+id,{
-method:"PUT",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-name:document.getElementById("on-"+id).innerText,
-phone:document.getElementById("op-"+id).innerText,
-address:document.getElementById("oa-"+id).innerText
-})
-})
-.then(()=>loadOwners());
 }
 
 function deleteOwner(id){
@@ -175,64 +253,43 @@ fetch("/delete_owner/"+id,{method:"DELETE"})
 
 // -------- VEHICLE --------
 function addVehicle(){
+let owner_id=document.getElementById("ownerDropdown").value;
+let vehicle_numberVal=document.getElementById("vehicle_number").value;
+let modelVal=document.getElementById("model").value;
+let typeVal=document.getElementById("type").value;
+
+if(!owner_id||!vehicle_numberVal||!modelVal||!typeVal){
+alert("Fill all fields");
+return;
+}
+
 fetch("/add_vehicle",{method:"POST",headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-owner_id:ownerDropdown.value,
-vehicle_number:vehicle_number.value,
-model:model.value,
-type:type.value
-})})
-.then(()=>{loadVehicles();loadDashboard();});
+body:JSON.stringify({owner_id,vehicle_number:vehicle_numberVal,model:modelVal,type:typeVal})})
+.then(()=>{
+loadVehicles();
+loadDashboard();
+});
 }
 
 function loadVehicles(){
-fetch("/get_vehicles")
-.then(res=>res.json())
-.then(data=>{
+fetch("/get_vehicles").then(r=>r.json()).then(data=>{
 let rows="",dd="";
 data.forEach(v=>{
-rows+=`
-<tr>
+rows+=`<tr>
 <td>${v.vehicle_id}</td>
-
-<td id="vo-${v.vehicle_id}">${v.owner_id}</td>
-<td id="vn-${v.vehicle_id}">${v.vehicle_number}</td>
-<td id="vm-${v.vehicle_id}">${v.model}</td>
-<td id="vt-${v.vehicle_id}">${v.type}</td>
-
+<td>${v.owner_id}</td>
+<td>${v.vehicle_number}</td>
+<td>${v.model}</td>
+<td>${v.type}</td>
 <td>
-<button onclick="enableVehicle(${v.vehicle_id})">Edit</button>
-<button onclick="saveVehicle(${v.vehicle_id})">Save</button>
+<button onclick="openEdit('vehicle',${v.vehicle_id},${v.owner_id},'${v.vehicle_number}','${v.model}','${v.type}')">Edit</button>
 <button onclick="deleteVehicle(${v.vehicle_id})">Delete</button>
-</td>
-</tr>`;
+</td></tr>`;
 dd+=`<option value="${v.vehicle_id}">${v.vehicle_number}</option>`;
 });
 vehicleTable.innerHTML=rows;
 vehicleDropdown.innerHTML=dd;
 });
-}
-
-function enableVehicle(id){
-["vo","vn","vm","vt"].forEach(f=>{
-let el=document.getElementById(f+"-"+id);
-el.contentEditable=true;
-el.style.background="#fff3cd";
-});
-}
-
-function saveVehicle(id){
-fetch("/update_vehicle/"+id,{
-method:"PUT",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-owner_id:document.getElementById("vo-"+id).innerText,
-vehicle_number:document.getElementById("vn-"+id).innerText,
-model:document.getElementById("vm-"+id).innerText,
-type:document.getElementById("vt-"+id).innerText
-})
-})
-.then(()=>loadVehicles());
 }
 
 function deleteVehicle(id){
@@ -242,67 +299,47 @@ fetch("/delete_vehicle/"+id,{method:"DELETE"})
 
 // -------- SERVICE --------
 function addService(){
+let vehicle_id=document.getElementById("vehicleDropdown").value;
+let service_dateVal=document.getElementById("date").value;
+let descriptionVal=document.getElementById("desc").value;
+let costVal=document.getElementById("cost").value;
+
+if(!vehicle_id||!service_dateVal||!descriptionVal||!costVal){
+alert("Fill all fields");
+return;
+}
+
 fetch("/add_service",{method:"POST",headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-vehicle_id:vehicleDropdown.value,
-service_date:date.value,
-description:desc.value,
-cost:cost.value
-})})
-.then(()=>{loadServices();loadDashboard();loadHistory();});
+body:JSON.stringify({vehicle_id,service_date:service_dateVal,description:descriptionVal,cost:costVal})})
+.then(()=>{
+loadServices();
+loadHistory();
+loadDashboard();
+});
 }
 
 function loadServices(){
-fetch("/get_services")
-.then(res=>res.json())
-.then(data=>{
+fetch("/get_services").then(r=>r.json()).then(data=>{
 let rows="";
 data.forEach(s=>{
-rows+=`
-<tr>
+rows+=`<tr>
 <td>${s.service_id}</td>
-
-<td id="sv-${s.service_id}">${s.vehicle_id}</td>
-<td id="sd-${s.service_id}">${s.service_date}</td>
-<td id="ss-${s.service_id}">${s.description}</td>
-<td id="sc-${s.service_id}">${s.cost}</td>
-
+<td>${s.vehicle_id}</td>
+<td>${s.service_date}</td>
+<td>${s.description}</td>
+<td>${s.cost}</td>
 <td>
-<button onclick="enableService(${s.service_id})">Edit</button>
-<button onclick="saveService(${s.service_id})">Save</button>
+<button onclick="openEdit('service',${s.service_id},${s.vehicle_id},'${s.service_date}','${s.description}','${s.cost}')">Edit</button>
 <button onclick="deleteService(${s.service_id})">Delete</button>
-</td>
-</tr>`;
+</td></tr>`;
 });
 serviceTable.innerHTML=rows;
 });
 }
 
-function enableService(id){
-["sv","sd","ss","sc"].forEach(f=>{
-let el=document.getElementById(f+"-"+id);
-el.contentEditable=true;
-el.style.background="#fff3cd";
-});
-}
-
-function saveService(id){
-fetch("/update_service/"+id,{
-method:"PUT",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({
-vehicle_id:document.getElementById("sv-"+id).innerText,
-service_date:document.getElementById("sd-"+id).innerText,
-description:document.getElementById("ss-"+id).innerText,
-cost:document.getElementById("sc-"+id).innerText
-})
-})
-.then(()=>loadServices());
-}
-
 function deleteService(id){
 fetch("/delete_service/"+id,{method:"DELETE"})
-.then(()=>{loadServices();loadDashboard();});
+.then(()=>{loadServices();loadHistory();loadDashboard();});
 }
 
 // -------- HISTORY --------
@@ -335,11 +372,69 @@ vehiclesCount.innerText=d.vehicles;
 servicesCount.innerText=d.services;
 
 if(chart) chart.destroy();
+
 chart=new Chart(document.getElementById("chart"),{
 type:"bar",
-data:{labels:["Owners","Vehicles","Services"],
-datasets:[{data:[d.owners,d.vehicles,d.services]}]}
+data:{
+labels:["Owners","Vehicles","Services"],
+datasets:[{data:[d.owners,d.vehicles,d.services]}]
+}
 });
+});
+}
+
+// SEARCH
+function searchOwner(val){
+document.querySelectorAll("#ownerTable tr").forEach(r=>{
+r.style.display=r.innerText.toLowerCase().includes(val.toLowerCase())?"":"none";
+});
+}
+
+function searchVehicle(val){
+document.querySelectorAll("#vehicleTable tr").forEach(r=>{
+r.style.display=r.innerText.toLowerCase().includes(val.toLowerCase())?"":"none";
+});
+}
+
+function searchService(val){
+document.querySelectorAll("#serviceTable tr").forEach(r=>{
+r.style.display=r.innerText.toLowerCase().includes(val.toLowerCase())?"":"none";
+});
+}
+
+// MODAL EDIT
+function openEdit(type,id,a,b,c,d){
+editType=type;editId=id;
+modal.style.display="flex";
+m1.value=a;m2.value=b;m3.value=c;m4.value=d;
+}
+
+function closeModal(){modal.style.display="none";}
+
+function saveEdit(){
+let url="",body={};
+
+if(editType=="owner"){
+url="/update_owner/"+editId;
+body={name:m1.value,phone:m2.value,address:m3.value};
+}
+if(editType=="vehicle"){
+url="/update_vehicle/"+editId;
+body={owner_id:m1.value,vehicle_number:m2.value,model:m3.value,type:m4.value};
+}
+if(editType=="service"){
+url="/update_service/"+editId;
+body={vehicle_id:m1.value,service_date:m2.value,description:m3.value,cost:m4.value};
+}
+
+fetch(url,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
+.then(()=>{
+closeModal();
+loadOwners();
+loadVehicles();
+loadServices();
+loadHistory();
+loadDashboard();
 });
 }
 
