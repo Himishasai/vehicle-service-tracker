@@ -1,1 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login</title>
+<style>
+body {
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+background:#1e3c72;
+}
+.box {
+background:white;
+padding:30px;
+border-radius:10px;
+}
+input {
+display:block;
+margin:10px;
+padding:10px;
+}
+button {
+padding:10px;
+background:#457b9d;
+color:white;
+border:none;
+cursor:pointer;
+}
+</style>
+</head>
 
+<body>
+
+<div class="box">
+<h2>Login</h2>
+
+<input id="username" placeholder="Username">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+</div>
+
+<script>
+function login(){
+
+const username = document.getElementById("username").value;
+const password = document.getElementById("password").value;
+
+fetch("/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({username,password})
+})
+.then(res=>res.json())
+.then(data=>{
+if(data.status==="success"){
+window.location.href="/ui";   // ✅ WORKING REDIRECT
+}else{
+alert("Wrong login");
+}
+})
+.catch(err=>{
+console.log(err);
+alert("Server error");
+});
+}
+</script>
+
+</body>
+</html>
