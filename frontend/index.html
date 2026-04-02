@@ -12,8 +12,9 @@ body {margin:0;font-family:Arial;background:linear-gradient(to right,#1e3c72,#2a
 .dashboard {display:flex;gap:20px;}
 .card {flex:1;background:#1d3557;padding:20px;border-radius:10px;text-align:center;}
 input,select {padding:10px;margin:5px;}
-button {padding:10px;background:#457b9d;color:white;border:none;cursor:pointer;}
+button {padding:10px;background:#457b9d;color:white;border:none;cursor:pointer;margin:2px;}
 table {width:100%;background:white;color:black;margin-top:20px;}
+td[contenteditable="true"] {background:#fff3cd;}
 </style>
 </head>
 
@@ -40,7 +41,7 @@ table {width:100%;background:white;color:black;margin-top:20px;}
 
 <!-- OWNER -->
 <div id="owner" class="section">
-<h2>Add Owner</h2>
+<h2>Owner Management</h2>
 
 <input id="name" placeholder="Name">
 <input id="phone" placeholder="Phone">
@@ -96,172 +97,198 @@ table {width:100%;background:white;color:black;margin-top:20px;}
 
 // -------- NAVIGATION --------
 function showSection(id){
-document.querySelectorAll(".section").forEach(s => s.style.display="none");
+document.querySelectorAll(".section").forEach(s=>s.style.display="none");
 document.getElementById(id).style.display="block";
 }
 
 // -------- OWNER --------
 function addOwner(){
-    const name = document.getElementById("name").value;
-    const phone = document.getElementById("phone").value;
-    const address = document.getElementById("address").value;
+const name=document.getElementById("name").value;
+const phone=document.getElementById("phone").value;
+const address=document.getElementById("address").value;
 
-    if(!name || !phone || !address){
-        alert("Fill all fields");
-        return;
-    }
-
-    fetch("/add_owner", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({name, phone, address})
-    })
-    .then(res=>res.json())
-    .then(data=>{
-        alert(data.message);
-        loadOwners();
-        loadDashboard();
-    });
+if(!name||!phone||!address){
+alert("Fill all fields");
+return;
 }
 
+fetch("/add_owner",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({name,phone,address})
+})
+.then(res=>res.json())
+.then(data=>{
+alert(data.message);
+loadOwners();
+loadDashboard();
+});
+}
+
+// LOAD OWNERS WITH EDIT + SAVE
 function loadOwners(){
-    fetch("/get_owners")
-    .then(res=>res.json())
-    .then(data=>{
-        let rows="";
-        let dropdown="";
+fetch("/get_owners")
+.then(res=>res.json())
+.then(data=>{
 
-        data.forEach(o=>{
-            rows+=`<tr>
-            <td>${o.owner_id}</td>
-            <td>${o.name}</td>
-            <td>${o.phone}</td>
-            <td>${o.address}</td>
-            <td><button onclick="deleteOwner(${o.owner_id})">Delete</button></td>
-            </tr>`;
+let rows="",dropdown="";
 
-            dropdown+=`<option value="${o.owner_id}">${o.name}</option>`;
-        });
+data.forEach(o=>{
+rows+=`
+<tr>
+<td>${o.owner_id}</td>
 
-        document.getElementById("ownerTable").innerHTML = rows;
-        document.getElementById("ownerDropdown").innerHTML = dropdown;
-    });
+<td id="name-${o.owner_id}">${o.name}</td>
+<td id="phone-${o.owner_id}">${o.phone}</td>
+<td id="address-${o.owner_id}">${o.address}</td>
+
+<td>
+<button onclick="enableEdit(${o.owner_id})">Edit</button>
+<button onclick="saveEdit(${o.owner_id})">Save</button>
+<button onclick="deleteOwner(${o.owner_id})">Delete</button>
+</td>
+</tr>`;
+
+dropdown+=`<option value="${o.owner_id}">${o.name}</option>`;
+});
+
+ownerTable.innerHTML=rows;
+ownerDropdown.innerHTML=dropdown;
+});
 }
 
+// ENABLE EDIT
+function enableEdit(id){
+["name","phone","address"].forEach(field=>{
+let el=document.getElementById(field+"-"+id);
+el.contentEditable=true;
+el.style.background="#fff3cd";
+});
+}
+
+// SAVE EDIT
+function saveEdit(id){
+const name=document.getElementById("name-"+id).innerText.trim();
+const phone=document.getElementById("phone-"+id).innerText.trim();
+const address=document.getElementById("address-"+id).innerText.trim();
+
+if(!name||!phone||!address){
+alert("Fields cannot be empty");
+return;
+}
+
+fetch("/update_owner/"+id,{
+method:"PUT",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({name,phone,address})
+})
+.then(res=>res.json())
+.then(()=>{
+alert("Updated Successfully");
+loadOwners();
+});
+}
+
+// DELETE OWNER
 function deleteOwner(id){
-    fetch("/delete_owner/"+id,{method:"DELETE"})
-    .then(()=>{
-        loadOwners();
-        loadDashboard();
-    });
+fetch("/delete_owner/"+id,{method:"DELETE"})
+.then(()=>{
+loadOwners();
+loadDashboard();
+});
 }
 
 // -------- VEHICLE --------
 function addVehicle(){
-    const owner_id = document.getElementById("ownerDropdown").value;
-    const vehicle_number = document.getElementById("vehicle_number").value;
-    const model = document.getElementById("model").value;
-    const type = document.getElementById("type").value;
+const owner_id=ownerDropdown.value;
+const vehicle_number=document.getElementById("vehicle_number").value;
+const model=document.getElementById("model").value;
+const type=document.getElementById("type").value;
 
-    if(!owner_id || !vehicle_number || !model || !type){
-        alert("Fill all fields");
-        return;
-    }
+if(!owner_id||!vehicle_number||!model||!type){
+alert("Fill all fields");
+return;
+}
 
-    fetch("/add_vehicle", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({owner_id, vehicle_number, model, type})
-    })
-    .then(res=>res.json())
-    .then(data=>{
-        alert(data.message);
-        loadVehicles();
-        loadDashboard();
-    });
+fetch("/add_vehicle",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({owner_id,vehicle_number,model,type})
+})
+.then(()=>{alert("Vehicle Added");loadVehicles();loadDashboard();});
 }
 
 function loadVehicles(){
-    fetch("/get_vehicles")
-    .then(res=>res.json())
-    .then(data=>{
-        let dropdown="";
-        data.forEach(v=>{
-            dropdown+=`<option value="${v.vehicle_id}">${v.vehicle_number}</option>`;
-        });
-        document.getElementById("vehicleDropdown").innerHTML = dropdown;
-    });
+fetch("/get_vehicles")
+.then(res=>res.json())
+.then(data=>{
+let dropdown="";
+data.forEach(v=>{
+dropdown+=`<option value="${v.vehicle_id}">${v.vehicle_number}</option>`;
+});
+vehicleDropdown.innerHTML=dropdown;
+});
 }
 
 // -------- SERVICE --------
 function addService(){
-    const vehicle_id = document.getElementById("vehicleDropdown").value;
-    const date = document.getElementById("date").value;
-    const desc = document.getElementById("desc").value;
-    const cost = document.getElementById("cost").value;
+const vehicle_id=vehicleDropdown.value;
+const date=document.getElementById("date").value;
+const desc=document.getElementById("desc").value;
+const cost=document.getElementById("cost").value;
 
-    if(!vehicle_id || !date || !desc || !cost){
-        alert("Fill all fields");
-        return;
-    }
+if(!vehicle_id||!date||!desc||!cost){
+alert("Fill all fields");
+return;
+}
 
-    fetch("/add_service", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({
-            vehicle_id,
-            service_date: date,
-            description: desc,
-            cost
-        })
-    })
-    .then(res=>res.json())
-    .then(data=>{
-        alert(data.message);
-        loadHistory();
-        loadDashboard();
-    });
+fetch("/add_service",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({vehicle_id,service_date:date,description:desc,cost})
+})
+.then(()=>{alert("Service Added");loadHistory();loadDashboard();});
 }
 
 // -------- HISTORY --------
 function loadHistory(){
-    fetch("/history")
-    .then(res=>res.json())
-    .then(data=>{
-        let rows="";
-        data.forEach(h=>{
-            rows+=`<tr>
-            <td>${h.service_id}</td>
-            <td>${h.vehicle_number}</td>
-            <td>${h.service_date}</td>
-            <td>${h.description}</td>
-            <td>${h.cost}</td>
-            </tr>`;
-        });
-        document.getElementById("historyTable").innerHTML = rows;
-    });
+fetch("/history")
+.then(res=>res.json())
+.then(data=>{
+let rows="";
+data.forEach(h=>{
+rows+=`<tr>
+<td>${h.service_id}</td>
+<td>${h.vehicle_number}</td>
+<td>${h.service_date}</td>
+<td>${h.description}</td>
+<td>${h.cost}</td>
+</tr>`;
+});
+historyTable.innerHTML=rows;
+});
 }
 
 // -------- DASHBOARD --------
 let chart;
 function loadDashboard(){
-    fetch("/dashboard")
-    .then(res=>res.json())
-    .then(d=>{
-        document.getElementById("ownersCount").innerText = d.owners;
-        document.getElementById("vehiclesCount").innerText = d.vehicles;
-        document.getElementById("servicesCount").innerText = d.services;
+fetch("/dashboard")
+.then(res=>res.json())
+.then(d=>{
+ownersCount.innerText=d.owners;
+vehiclesCount.innerText=d.vehicles;
+servicesCount.innerText=d.services;
 
-        if(chart) chart.destroy();
+if(chart) chart.destroy();
 
-        chart = new Chart(document.getElementById("chart"), {
-            type:"bar",
-            data:{
-                labels:["Owners","Vehicles","Services"],
-                datasets:[{data:[d.owners,d.vehicles,d.services]}]
-            }
-        });
-    });
+chart=new Chart(document.getElementById("chart"),{
+type:"bar",
+data:{
+labels:["Owners","Vehicles","Services"],
+datasets:[{data:[d.owners,d.vehicles,d.services]}]
+}
+});
+});
 }
 
 // -------- INIT --------
