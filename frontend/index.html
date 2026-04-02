@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Dashboard</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Service Tracker</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
 <div class="navbar">
-    <h2>🚗 Service Tracker</h2>
+    🚗 Service Tracker
     <div>
-        <a href="/">Dashboard</a>
+        <a href="index.html">Dashboard</a>
         <a href="add_owner.html">Owner</a>
         <a href="add_vehicle.html">Vehicle</a>
         <a href="add_service.html">Service</a>
@@ -20,33 +19,37 @@
 </div>
 
 <div class="container">
-<h2>Dashboard</h2>
 
-<div class="cards">
-<div class="card">Owners: <span id="o"></span></div>
-<div class="card">Vehicles: <span id="v"></span></div>
-<div class="card">Services: <span id="s"></span></div>
-</div>
+    <h1>Dashboard</h1>
 
-<canvas id="chart"></canvas>
+    <div class="cards">
+        <div class="card">
+            <h3>Total Vehicles</h3>
+            <p id="vehicles">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Services</h3>
+            <p id="services">0</p>
+        </div>
+
+        <div class="card">
+            <h3>Total Cost</h3>
+            <p id="cost">₹0</p>
+        </div>
+    </div>
+
 </div>
 
 <script>
 fetch("/dashboard")
-.then(r=>r.json())
-.then(d=>{
-o.innerText=d.owners;
-v.innerText=d.vehicles;
-s.innerText=d.services;
-
-new Chart(document.getElementById("chart"),{
-type:"bar",
-data:{
-labels:["Owners","Vehicles","Services"],
-datasets:[{data:[d.owners,d.vehicles,d.services]}]
-}
-});
-});
+.then(res => res.json())
+.then(data => {
+    document.getElementById("vehicles").innerText = data.total_vehicles;
+    document.getElementById("services").innerText = data.total_services;
+    document.getElementById("cost").innerText = "₹" + data.total_cost;
+})
+.catch(() => alert("Backend not running!"));
 </script>
 
 </body>
