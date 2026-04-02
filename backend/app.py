@@ -4,7 +4,8 @@ import os
 
 app = Flask(__name__, static_folder="../frontend")
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "../database/vehicle.db")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "../database/vehicle.db")
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -38,6 +39,25 @@ def get_owners():
     conn.close()
     return jsonify([dict(x) for x in data])
 
+@app.route("/update_owner/<int:id>", methods=["PUT"])
+def update_owner(id):
+    data = request.json
+    conn = get_db()
+    conn.execute("""
+        UPDATE Owners SET name=?, phone=?, address=? WHERE owner_id=?
+    """, (data["name"], data["phone"], data["address"], id))
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Updated"})
+
+@app.route("/delete_owner/<int:id>", methods=["DELETE"])
+def delete_owner(id):
+    conn = get_db()
+    conn.execute("DELETE FROM Owners WHERE owner_id=?", (id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Deleted"})
+
 # ---------- VEHICLE ----------
 @app.route("/add_vehicle", methods=["POST"])
 def add_vehicle():
@@ -48,6 +68,13 @@ def add_vehicle():
     conn.commit()
     conn.close()
     return jsonify({"message": "Vehicle added"})
+
+@app.route("/get_vehicles")
+def get_vehicles():
+    conn = get_db()
+    data = conn.execute("SELECT * FROM Vehicles").fetchall()
+    conn.close()
+    return jsonify([dict(x) for x in data])
 
 # ---------- SERVICE ----------
 @app.route("/add_service", methods=["POST"])
