@@ -2,9 +2,11 @@ from flask import Flask, request, jsonify, send_from_directory
 import sqlite3
 import os
 
-app = Flask(__name__, static_folder="../frontend")
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_PATH = os.path.join(BASE_DIR, "../frontend")
+
+app = Flask(__name__, static_folder=FRONTEND_PATH)
+
 DB_PATH = os.path.join(BASE_DIR, "../database/vehicle.db")
 
 def get_db():
@@ -12,14 +14,26 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
-# ---------- FRONTEND ----------
+# ---------- ROUTES ----------
+@app.route("/")
+def login_page():
+    return send_from_directory(FRONTEND_PATH, "login.html")
+
 @app.route("/ui")
 def ui():
-    return send_from_directory("../frontend", "index.html")
+    return send_from_directory(FRONTEND_PATH, "index.html")
 
 @app.route("/<path:path>")
 def static_files(path):
-    return send_from_directory("../frontend", path)
+    return send_from_directory(FRONTEND_PATH, path)
+
+# ---------- LOGIN ----------
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.json
+    if data.get("username") == "admin" and data.get("password") == "1234":
+        return jsonify({"status": "success"})
+    return jsonify({"status": "fail"})
 
 # ---------- OWNER ----------
 @app.route("/add_owner", methods=["POST"])
@@ -39,16 +53,20 @@ def get_owners():
     conn.close()
     return jsonify([dict(x) for x in data])
 
+# 🔥 EDIT OWNER (IMPORTANT)
 @app.route("/update_owner/<int:id>", methods=["PUT"])
 def update_owner(id):
     data = request.json
+
     conn = get_db()
-    conn.execute("""
-        UPDATE Owners SET name=?, phone=?, address=? WHERE owner_id=?
-    """, (data["name"], data["phone"], data["address"], id))
+    conn.execute(
+        "UPDATE Owners SET name=?, phone=?, address=? WHERE owner_id=?",
+        (data["name"], data["phone"], data["address"], id)
+    )
     conn.commit()
     conn.close()
-    return jsonify({"message": "Updated"})
+
+    return jsonify({"message": "Owner Updated Successfully"})
 
 @app.route("/delete_owner/<int:id>", methods=["DELETE"])
 def delete_owner(id):
@@ -92,9 +110,9 @@ def add_service():
 def history():
     conn = get_db()
     data = conn.execute("""
-    SELECT s.service_id, v.vehicle_number, s.service_date, s.description, s.cost
-    FROM Services s
-    JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
+        SELECT s.service_id, v.vehicle_number, s.service_date, s.description, s.cost
+        FROM Services s
+        JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
     """).fetchall()
     conn.close()
     return jsonify([dict(x) for x in data])
@@ -107,11 +125,8 @@ def dashboard():
     vehicles = conn.execute("SELECT COUNT(*) FROM Vehicles").fetchone()[0]
     services = conn.execute("SELECT COUNT(*) FROM Services").fetchone()[0]
     conn.close()
-    return jsonify({
-        "owners": owners,
-        "vehicles": vehicles,
-        "services": services
-    })
+    return jsonify({"owners": owners, "vehicles": vehicles, "services": services})
 
+# ---------- RUN ----------
 if __name__ == "__main__":
     app.run(debug=True)
