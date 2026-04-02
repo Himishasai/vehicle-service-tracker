@@ -3,112 +3,142 @@ from flask_cors import CORS
 import sqlite3
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="../frontend")
 CORS(app)
 
+# PATHS
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "../database/vehicle.db")
-FRONTEND = os.path.join(BASE_DIR, "../frontend")
+FRONTEND_FOLDER = os.path.join(BASE_DIR, "../frontend")
 
+# DATABASE
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
-# ---------- FRONTEND ----------
+# HOME
 @app.route("/")
 def home():
-    return send_from_directory(FRONTEND, "index.html")
+    return "Backend Running 🚀"
+
+# SERVE UI
+@app.route("/ui")
+def ui():
+    return send_from_directory(FRONTEND_FOLDER, "index.html")
 
 @app.route("/<path:path>")
 def static_files(path):
-    return send_from_directory(FRONTEND, path)
+    return send_from_directory(FRONTEND_FOLDER, path)
 
-# ---------- ADD ----------
+# ---------------- OWNER CRUD ----------------
+
+# ADD OWNER
 @app.route("/add_owner", methods=["POST"])
 def add_owner():
     data = request.json
     conn = get_db()
-    conn.execute("INSERT INTO Owners (name, phone, address) VALUES (?, ?, ?)",
-                 (data["name"], data["phone"], data["address"]))
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "INSERT INTO Owners (name, phone, address) VALUES (?, ?, ?)",
+        (data["name"], data["phone"], data["address"])
+    )
+
     conn.commit()
     conn.close()
+
     return jsonify({"message": "Owner added"})
 
-@app.route("/add_vehicle", methods=["POST"])
-def add_vehicle():
-    data = request.json
+# GET OWNERS
+@app.route("/get_owners", methods=["GET"])
+def get_owners():
     conn = get_db()
-    conn.execute("INSERT INTO Vehicles (owner_id, vehicle_number, model, type) VALUES (?, ?, ?, ?)",
-                 (data["owner_id"], data["vehicle_number"], data["model"], data["type"]))
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM Owners")
+    rows = cursor.fetchall()
+    conn.close()
+
+    return jsonify([dict(r) for r in rows])
+
+# DELETE OWNER
+@app.route("/delete_owner/<int:id>", methods=["DELETE"])
+def delete_owner(id):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("DELETE FROM Owners WHERE owner_id=?", (id,))
     conn.commit()
     conn.close()
-    return jsonify({"message": "Vehicle added"})
 
-@app.route("/add_service", methods=["POST"])
-def add_service():
-    data = request.json
-    conn = get_db()
-    conn.execute("INSERT INTO Services (vehicle_id, mechanic_id, service_date, description, cost) VALUES (?, ?, ?, ?, ?)",
-                 (data["vehicle_id"], data["mechanic_id"], data["service_date"], data["description"], data["cost"]))
-    conn.commit()
-    conn.close()
-    return jsonify({"message": "Service added"})
-
-# ---------- VIEW ----------
-@app.route("/service_history")
-def history():
-    conn = get_db()
-    data = conn.execute("""
-        SELECT s.service_id, v.vehicle_number, s.service_date, s.description, s.cost
-        FROM Services s
-        JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
-    """).fetchall()
-    conn.close()
-    return jsonify([dict(x) for x in data])
-
-# ---------- DELETE ----------
-@app.route("/delete_service/<int:id>", methods=["DELETE"])
-def delete_service(id):
-    conn = get_db()
-    conn.execute("DELETE FROM Services WHERE service_id=?", (id,))
-    conn.commit()
-    conn.close()
     return jsonify({"message": "Deleted"})
 
-# ---------- UPDATE ----------
-@app.route("/update_service/<int:id>", methods=["PUT"])
-def update_service(id):
+# UPDATE OWNER
+@app.route("/update_owner/<int:id>", methods=["PUT"])
+def update_owner(id):
     data = request.json
+
     conn = get_db()
-    conn.execute("UPDATE Services SET description=?, cost=? WHERE service_id=?",
-                 (data["description"], data["cost"], id))
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE Owners
+        SET name=?, phone=?, address=?
+        WHERE owner_id=?
+    """, (data["name"], data["phone"], data["address"], id))
+
     conn.commit()
     conn.close()
+
     return jsonify({"message": "Updated"})
 
-# ---------- SEARCH ----------
-@app.route("/search_vehicle/<v>")
-def search(v):
-    conn = get_db()
-    data = conn.execute("SELECT * FROM Vehicles WHERE vehicle_number LIKE ?", ('%' + v + '%',)).fetchall()
-    conn.close()
-    return jsonify([dict(x) for x in data])
-
-# ---------- DASHBOARD ----------
-@app.route("/dashboard")
+# ---------------- DASHBOARD ----------------
+@app.route("/dashboard", methods=["GET"])
 def dashboard():
     conn = get_db()
-    owners = conn.execute("SELECT COUNT(*) FROM Owners").fetchone()[0]
-    vehicles = conn.execute("SELECT COUNT(*) FROM Vehicles").fetchone()[0]
-    services = conn.execute("SELECT COUNT(*) FROM Services").fetchone()[0]
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM Vehicles")
+    v = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM Services")
+    s = cursor.fetchone()[0]
+
+    cursor.execute("SELECT SUM(cost) FROM Services")
+    c = cursor.fetchone()[0] or 0
+
     conn.close()
 
     return jsonify({
-        "owners": owners,
-        "vehicles": vehicles,
-        "services": services
+        "total_vehicles": v,
+        "total_services": s,
+        "total_cost": c
     })
 
+# ---------------- HISTORY ----------------
+@app.route("/service_history", methods=["GET"])
+def history():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 
+            v.vehicle_number,
+            s.service_date,
+            s.description,
+            s.cost,
+            m.name AS mechanic
+        FROM Services s
+        JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
+        JOIN Mechanics m ON s.mechanic_id = m.mechanic_id
+    """)
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    return jsonify([dict(r) for r in rows])
+
+# RUN
 if __name__ == "__main__":
-    app.run(port=10000, debug=True)
+    app.run(host="0.0.0.0", port=10000)
