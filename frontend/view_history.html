@@ -1,65 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>History</title>
-<link rel="stylesheet" href="style.css">
+    <title>Service History</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<div class="navbar">
+    🚗 Service Tracker
+    <div>
+        <a href="index.html">Dashboard</a>
+        <a href="add_owner.html">Owner</a>
+        <a href="add_vehicle.html">Vehicle</a>
+        <a href="add_service.html">Service</a>
+        <a href="view_history.html">History</a>
+    </div>
+</div>
+
 <div class="container">
-<h2>Service History</h2>
+    <h1>Service History</h1>
 
-<table>
-<thead>
-<tr>
-<th>ID</th><th>Vehicle</th><th>Date</th><th>Description</th><th>Cost</th><th>Action</th>
-</tr>
-</thead>
+    <table>
+        <thead>
+            <tr>
+                <th>Vehicle</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Cost</th>
+                <th>Mechanic</th>
+            </tr>
+        </thead>
 
-<tbody id="t"></tbody>
-</table>
+        <tbody id="historyTable"></tbody>
+    </table>
 </div>
 
 <script>
-function load(){
 fetch("/service_history")
-.then(r=>r.json())
-.then(d=>{
-t.innerHTML="";
-d.forEach(x=>{
-t.innerHTML+=`
-<tr>
-<td>${x.service_id}</td>
-<td>${x.vehicle_number}</td>
-<td>${x.service_date}</td>
-<td>${x.description}</td>
-<td>${x.cost}</td>
-<td>
-<button style="background:#ff4d4d" onclick="del(${x.service_id})">Delete</button>
-<button style="background:#4dff88" onclick="edit(${x.service_id})">Edit</button>
-</td>
-</tr>`;
-});
-});
-}
+.then(res => res.json())
+.then(data => {
 
-function del(id){
-fetch("/delete_service/"+id,{method:"DELETE"})
-.then(()=>{alert("Deleted");load();});
-}
+    let table = document.getElementById("historyTable");
+    table.innerHTML = "";
 
-function edit(id){
-let d=prompt("New description");
-let c=prompt("New cost");
-fetch("/update_service/"+id,{
-method:"PUT",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({description:d,cost:c})
-}).then(()=>{alert("Updated");load();});
-}
+    data.forEach(row => {
+        table.innerHTML += `
+            <tr>
+                <td>${row.vehicle_number}</td>
+                <td>${row.service_date}</td>
+                <td>${row.description}</td>
+                <td>₹${row.cost}</td>
+                <td>${row.mechanic}</td>
+            </tr>
+        `;
+    });
 
-load();
+})
+.catch(() => alert("Error loading history"));
 </script>
 
 </body>
