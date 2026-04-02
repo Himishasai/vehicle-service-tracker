@@ -1,22 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Owner</title>
+    <title>Owner</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
+<div class="navbar">
+    🚗 Service Tracker
+    <div>
+        <a href="index.html">Dashboard</a>
+        <a href="add_owner.html">Owner</a>
+    </div>
+</div>
+
 <div class="container">
-    <h2>Add Owner</h2>
+
+    <h1>Manage Owners</h1>
 
     <input id="name" placeholder="Name">
     <input id="phone" placeholder="Phone">
     <input id="address" placeholder="Address">
 
-    <button onclick="addOwner()">Submit</button>
+    <button onclick="addOwner()">Add Owner</button>
+
+    <h2>Owner List</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Address</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody id="table"></tbody>
+    </table>
+
 </div>
 
 <script>
+
+function loadOwners() {
+    fetch("/get_owners")
+    .then(res => res.json())
+    .then(data => {
+
+        let t = document.getElementById("table");
+        t.innerHTML = "";
+
+        data.forEach(o => {
+            t.innerHTML += `
+            <tr>
+                <td>${o.name}</td>
+                <td>${o.phone}</td>
+                <td>${o.address}</td>
+                <td>
+                    <button onclick="editOwner(${o.owner_id}, '${o.name}', '${o.phone}', '${o.address}')">Edit</button>
+                    <button onclick="deleteOwner(${o.owner_id})">Delete</button>
+                </td>
+            </tr>`;
+        });
+    });
+}
+
 function addOwner() {
     fetch("/add_owner", {
         method: "POST",
@@ -27,9 +77,38 @@ function addOwner() {
             address: address.value
         })
     })
-    .then(res => res.json())
-    .then(data => alert(data.message));
+    .then(() => {
+        alert("Added");
+        loadOwners();
+    });
 }
+
+function deleteOwner(id) {
+    fetch(`/delete_owner/${id}`, { method: "DELETE" })
+    .then(() => {
+        alert("Deleted");
+        loadOwners();
+    });
+}
+
+function editOwner(id, name, phone, address) {
+    let n = prompt("Name", name);
+    let p = prompt("Phone", phone);
+    let a = prompt("Address", address);
+
+    fetch(`/update_owner/${id}`, {
+        method: "PUT",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({name:n, phone:p, address:a})
+    })
+    .then(() => {
+        alert("Updated");
+        loadOwners();
+    });
+}
+
+loadOwners();
+
 </script>
 
 </body>
