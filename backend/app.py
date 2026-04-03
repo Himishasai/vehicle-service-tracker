@@ -14,6 +14,7 @@ FRONTEND_FOLDER = os.path.join(BASE_DIR, "../frontend")
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 # ---------- ROUTES ----------
@@ -25,7 +26,6 @@ def home():
 def ui():
     return send_from_directory(FRONTEND_FOLDER, "index.html")
 
-# 🔥 LOGIN PAGE
 @app.route("/login.html")
 def login():
     return send_from_directory(FRONTEND_FOLDER, "login.html")
@@ -54,10 +54,25 @@ def get_owners():
     conn.close()
     return jsonify([dict(r) for r in rows])
 
+# 🔥 UPDATED DELETE OWNER
 @app.route("/delete_owner/<int:id>", methods=["DELETE"])
 def delete_owner(id):
     conn = get_db()
+
+    # DELETE SERVICES (via vehicles)
+    conn.execute("""
+        DELETE FROM Services
+        WHERE vehicle_id IN (
+            SELECT vehicle_id FROM Vehicles WHERE owner_id=?
+        )
+    """, (id,))
+
+    # DELETE VEHICLES
+    conn.execute("DELETE FROM Vehicles WHERE owner_id=?", (id,))
+
+    # DELETE OWNER
     conn.execute("DELETE FROM Owners WHERE owner_id=?", (id,))
+
     conn.commit()
     conn.close()
     return jsonify({"message": "Deleted"})
@@ -90,14 +105,25 @@ def add_vehicle():
 @app.route("/get_vehicles")
 def get_vehicles():
     conn = get_db()
-    rows = conn.execute("SELECT * FROM Vehicles").fetchall()
+    rows = conn.execute("""
+        SELECT v.*, o.name as owner_name
+        FROM Vehicles v
+        JOIN Owners o ON v.owner_id = o.owner_id
+    """).fetchall()
     conn.close()
     return jsonify([dict(r) for r in rows])
 
+# 🔥 UPDATED DELETE VEHICLE
 @app.route("/delete_vehicle/<int:id>", methods=["DELETE"])
 def delete_vehicle(id):
     conn = get_db()
+
+    # DELETE SERVICES FIRST
+    conn.execute("DELETE FROM Services WHERE vehicle_id=?", (id,))
+
+    # DELETE VEHICLE
     conn.execute("DELETE FROM Vehicles WHERE vehicle_id=?", (id,))
+
     conn.commit()
     conn.close()
     return jsonify({"message": "Deleted"})
