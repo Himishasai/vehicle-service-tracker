@@ -10,7 +10,8 @@ CREATE TABLE Vehicles (
     owner_id INTEGER,
     vehicle_number TEXT,
     model TEXT,
-    type TEXT
+    type TEXT,
+    FOREIGN KEY (owner_id) REFERENCES Owners(owner_id) ON DELETE CASCADE
 );
 
 CREATE TABLE Services (
@@ -18,5 +19,6 @@ CREATE TABLE Services (
     vehicle_id INTEGER,
     service_date TEXT,
     description TEXT,
-    cost REAL
+    cost REAL,
+    FOREIGN KEY (vehicle_id) REFERENCES Vehicles(vehicle_id) ON DELETE CASCADE
 );
