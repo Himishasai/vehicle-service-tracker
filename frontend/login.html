@@ -2,27 +2,34 @@
 <html>
 <head>
 <title>Login</title>
+
 <style>
-body {
+body{
+margin:0;
+height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
-background:#1e3c72;
+background:linear-gradient(to right,#1e3c72,#2a5298);
+font-family:Arial;
 }
-.box {
+
+.box{
 background:white;
 padding:30px;
 border-radius:10px;
+text-align:center;
 }
-input {
-display:block;
+
+input{
+padding:10px;
 margin:10px;
-padding:10px;
+width:200px;
 }
-button {
+
+button{
 padding:10px;
-background:#457b9d;
+background:#1e3c72;
 color:white;
 border:none;
 cursor:pointer;
@@ -35,36 +42,27 @@ cursor:pointer;
 <div class="box">
 <h2>Login</h2>
 
-<input id="username" placeholder="Username">
-<input id="password" type="password" placeholder="Password">
+<input id="user" placeholder="Username"><br>
+<input id="pass" type="password" placeholder="Password"><br>
 
 <button onclick="login()">Login</button>
 </div>
 
 <script>
+
 function login(){
+let u = document.getElementById("user").value;
+let p = document.getElementById("pass").value;
 
-const username = document.getElementById("username").value;
-const password = document.getElementById("password").value;
-
-fetch("/login",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({username,password})
-})
-.then(res=>res.json())
-.then(data=>{
-if(data.status==="success"){
-window.location.href="/ui";   // ✅ WORKING REDIRECT
+// simple login
+if(u==="admin" && p==="1234"){
+localStorage.setItem("loggedIn","true");
+window.location.href="/ui";
 }else{
-alert("Wrong login");
+alert("Invalid Login");
 }
-})
-.catch(err=>{
-console.log(err);
-alert("Server error");
-});
 }
+
 </script>
 
 </body>
