@@ -167,7 +167,7 @@ width:300px;
 <h2>Service</h2>
 
 <select id="vehicleDropdown"></select>
-<input id="date" placeholder="Date">
+<input id="date" type="date">
 <input id="desc" placeholder="Description">
 <input id="cost" placeholder="Cost">
 <button onclick="addService()">Add</button>
@@ -279,7 +279,7 @@ let rows="",dd="";
 data.forEach(v=>{
 rows+=`<tr>
 <td>${v.vehicle_id}</td>
-<td>${v.owner_id}</td>
+<td>${v.owner_name}</td>
 <td>${v.vehicle_number}</td>
 <td>${v.model}</td>
 <td>${v.type}</td>
