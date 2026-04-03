@@ -109,6 +109,11 @@ width:300px;
 <button onclick="showSection('vehicle')">Vehicle</button>
 <button onclick="showSection('service')">Service</button>
 <button onclick="showSection('history')">History</button>
+
+<div style="margin-left:auto;">
+<span>👤 Admin</span>
+<button onclick="logout()">Logout</button>
+</div>
 </div>
 
 <!-- DASHBOARD -->
@@ -196,6 +201,16 @@ width:300px;
 
 <script>
 
+// 🔐 LOGIN CHECK
+if(localStorage.getItem("loggedIn") !== "true"){
+window.location.href = "/login.html";
+}
+
+function logout(){
+localStorage.removeItem("loggedIn");
+window.location.href = "/login.html";
+}
+
 let editType="",editId="";
 
 // NAV
@@ -204,26 +219,17 @@ document.querySelectorAll(".section").forEach(s=>s.style.display="none");
 document.getElementById(id).style.display="block";
 }
 
-// -------- OWNER --------
+// OWNER
 function addOwner(){
-let nameVal = document.getElementById("name").value;
-let phoneVal = document.getElementById("phone").value;
-let addressVal = document.getElementById("address").value;
+let nameVal=document.getElementById("name").value;
+let phoneVal=document.getElementById("phone").value;
+let addressVal=document.getElementById("address").value;
 
-if(!nameVal || !phoneVal || !addressVal){
-alert("Fill all fields");
-return;
-}
+if(!nameVal||!phoneVal||!addressVal){alert("Fill all fields");return;}
 
 fetch("/add_owner",{method:"POST",headers:{"Content-Type":"application/json"},
 body:JSON.stringify({name:nameVal,phone:phoneVal,address:addressVal})})
-.then(()=>{
-document.getElementById("name").value="";
-document.getElementById("phone").value="";
-document.getElementById("address").value="";
-loadOwners();
-loadDashboard();
-});
+.then(()=>{loadOwners();loadDashboard();});
 }
 
 function loadOwners(){
@@ -251,7 +257,7 @@ fetch("/delete_owner/"+id,{method:"DELETE"})
 .then(()=>{loadOwners();loadDashboard();});
 }
 
-// -------- VEHICLE --------
+// VEHICLE
 function addVehicle(){
 let owner_id=document.getElementById("ownerDropdown").value;
 let vehicle_numberVal=document.getElementById("vehicle_number").value;
@@ -259,16 +265,12 @@ let modelVal=document.getElementById("model").value;
 let typeVal=document.getElementById("type").value;
 
 if(!owner_id||!vehicle_numberVal||!modelVal||!typeVal){
-alert("Fill all fields");
-return;
+alert("Fill all fields");return;
 }
 
 fetch("/add_vehicle",{method:"POST",headers:{"Content-Type":"application/json"},
 body:JSON.stringify({owner_id,vehicle_number:vehicle_numberVal,model:modelVal,type:typeVal})})
-.then(()=>{
-loadVehicles();
-loadDashboard();
-});
+.then(()=>{loadVehicles();loadDashboard();});
 }
 
 function loadVehicles(){
@@ -297,7 +299,7 @@ fetch("/delete_vehicle/"+id,{method:"DELETE"})
 .then(()=>{loadVehicles();loadDashboard();});
 }
 
-// -------- SERVICE --------
+// SERVICE
 function addService(){
 let vehicle_id=document.getElementById("vehicleDropdown").value;
 let service_dateVal=document.getElementById("date").value;
@@ -305,17 +307,12 @@ let descriptionVal=document.getElementById("desc").value;
 let costVal=document.getElementById("cost").value;
 
 if(!vehicle_id||!service_dateVal||!descriptionVal||!costVal){
-alert("Fill all fields");
-return;
+alert("Fill all fields");return;
 }
 
 fetch("/add_service",{method:"POST",headers:{"Content-Type":"application/json"},
 body:JSON.stringify({vehicle_id,service_date:service_dateVal,description:descriptionVal,cost:costVal})})
-.then(()=>{
-loadServices();
-loadHistory();
-loadDashboard();
-});
+.then(()=>{loadServices();loadHistory();loadDashboard();});
 }
 
 function loadServices(){
@@ -342,11 +339,9 @@ fetch("/delete_service/"+id,{method:"DELETE"})
 .then(()=>{loadServices();loadHistory();loadDashboard();});
 }
 
-// -------- HISTORY --------
+// HISTORY
 function loadHistory(){
-fetch("/history")
-.then(res=>res.json())
-.then(data=>{
+fetch("/history").then(r=>r.json()).then(data=>{
 let rows="";
 data.forEach(h=>{
 rows+=`<tr>
@@ -361,12 +356,10 @@ historyTable.innerHTML=rows;
 });
 }
 
-// -------- DASHBOARD --------
+// DASHBOARD
 let chart;
 function loadDashboard(){
-fetch("/dashboard")
-.then(res=>res.json())
-.then(d=>{
+fetch("/dashboard").then(r=>r.json()).then(d=>{
 ownersCount.innerText=d.owners;
 vehiclesCount.innerText=d.vehicles;
 servicesCount.innerText=d.services;
@@ -389,43 +382,31 @@ document.querySelectorAll("#ownerTable tr").forEach(r=>{
 r.style.display=r.innerText.toLowerCase().includes(val.toLowerCase())?"":"none";
 });
 }
-
 function searchVehicle(val){
 document.querySelectorAll("#vehicleTable tr").forEach(r=>{
 r.style.display=r.innerText.toLowerCase().includes(val.toLowerCase())?"":"none";
 });
 }
-
 function searchService(val){
 document.querySelectorAll("#serviceTable tr").forEach(r=>{
 r.style.display=r.innerText.toLowerCase().includes(val.toLowerCase())?"":"none";
 });
 }
 
-// MODAL EDIT
+// MODAL
 function openEdit(type,id,a,b,c,d){
 editType=type;editId=id;
 modal.style.display="flex";
 m1.value=a;m2.value=b;m3.value=c;m4.value=d;
 }
-
 function closeModal(){modal.style.display="none";}
 
 function saveEdit(){
 let url="",body={};
 
-if(editType=="owner"){
-url="/update_owner/"+editId;
-body={name:m1.value,phone:m2.value,address:m3.value};
-}
-if(editType=="vehicle"){
-url="/update_vehicle/"+editId;
-body={owner_id:m1.value,vehicle_number:m2.value,model:m3.value,type:m4.value};
-}
-if(editType=="service"){
-url="/update_service/"+editId;
-body={vehicle_id:m1.value,service_date:m2.value,description:m3.value,cost:m4.value};
-}
+if(editType=="owner"){url="/update_owner/"+editId;body={name:m1.value,phone:m2.value,address:m3.value};}
+if(editType=="vehicle"){url="/update_vehicle/"+editId;body={owner_id:m1.value,vehicle_number:m2.value,model:m3.value,type:m4.value};}
+if(editType=="service"){url="/update_service/"+editId;body={vehicle_id:m1.value,service_date:m2.value,description:m3.value,cost:m4.value};}
 
 fetch(url,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
 .then(()=>{
