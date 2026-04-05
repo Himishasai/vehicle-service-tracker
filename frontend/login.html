@@ -10,29 +10,63 @@ height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-background:linear-gradient(to right,#1e3c72,#2a5298);
-font-family:Arial;
+background:linear-gradient(135deg,#1e3c72,#2a5298,#6dd5ed);
+font-family:'Segoe UI', sans-serif;
+overflow:hidden;
 }
 
+/* GLASS CARD */
 .box{
-background:white;
-padding:30px;
-border-radius:10px;
+background:rgba(255,255,255,0.15);
+padding:40px;
+border-radius:20px;
 text-align:center;
+backdrop-filter:blur(15px);
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+width:300px;
+animation:fadeIn 1s ease;
 }
 
+/* TITLE */
+.box h2{
+margin-bottom:20px;
+color:white;
+}
+
+/* INPUT */
 input{
-padding:10px;
-margin:10px;
-width:200px;
+padding:12px;
+margin:10px 0;
+width:100%;
+border-radius:10px;
+border:none;
+outline:none;
+font-size:14px;
 }
 
+/* BUTTON */
 button{
-padding:10px;
-background:#1e3c72;
+padding:12px;
+width:100%;
+margin-top:10px;
+background:linear-gradient(135deg,#00c6ff,#0072ff);
 color:white;
 border:none;
+border-radius:10px;
 cursor:pointer;
+font-size:15px;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.05);
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* ANIMATION */
+@keyframes fadeIn{
+from{opacity:0; transform:translateY(20px);}
+to{opacity:1; transform:translateY(0);}
 }
 </style>
 </head>
@@ -40,7 +74,7 @@ cursor:pointer;
 <body>
 
 <div class="box">
-<h2>Login</h2>
+<h2>🚗 Vehicle Tracker Login</h2>
 
 <input id="user" placeholder="Username"><br>
 <input id="pass" type="password" placeholder="Password"><br>
@@ -54,7 +88,7 @@ function login(){
 let u = document.getElementById("user").value;
 let p = document.getElementById("pass").value;
 
-// simple login
+// SAME LOGIN LOGIC (UNCHANGED)
 if(u==="admin" && p==="1234"){
 localStorage.setItem("loggedIn","true");
 window.location.href="/ui";
