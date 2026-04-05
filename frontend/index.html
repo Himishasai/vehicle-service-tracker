@@ -11,6 +11,7 @@ background:#e6f0ef;
 color:#333;
 }
 
+/* NAVBAR */
 .navbar {
 background:white;
 padding:15px 25px;
@@ -30,8 +31,52 @@ cursor:pointer;
 
 .navbar button:hover { color:#2a9d8f; }
 
+/* SECTIONS */
 .section { display:none; padding:25px; }
 
+/* HERO DASHBOARD */
+.hero{
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:linear-gradient(to right,#e8f0ff,#ffffff);
+padding:40px;
+border-radius:20px;
+margin-bottom:30px;
+}
+
+.hero-text h1{
+font-size:30px;
+margin-bottom:10px;
+}
+
+.hero-box{
+background:white;
+padding:25px;
+border-radius:15px;
+width:300px;
+box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+.hero-box input{
+width:100%;
+padding:10px;
+margin:10px 0;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+.hero-box button{
+width:100%;
+padding:10px;
+background:#111;
+color:white;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+/* DASHBOARD CARDS */
 .dashboard {
 display:grid;
 grid-template-columns:repeat(3,1fr);
@@ -49,6 +94,7 @@ box-shadow:0 4px 15px rgba(0,0,0,0.05);
 .card h3 { color:#888; font-size:14px; }
 .card p { font-size:28px; color:#2a9d8f; font-weight:bold; }
 
+/* INPUTS */
 input,select {
 padding:10px;
 margin:5px;
@@ -56,6 +102,7 @@ border:1px solid #ccc;
 border-radius:8px;
 }
 
+/* BUTTON */
 button {
 padding:8px 14px;
 background:#2a9d8f;
@@ -67,6 +114,7 @@ cursor:pointer;
 
 button:hover { background:#21867a; }
 
+/* TABLE */
 table {
 width:100%;
 background:white;
@@ -86,6 +134,7 @@ border-radius:8px;
 border:1px solid #ccc;
 }
 
+/* MODAL */
 .modal {
 display:none;
 position:fixed;
@@ -124,12 +173,29 @@ width:300px;
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="section">
-<h2>Main Dashboard</h2>
+
+<div class="hero">
+<div class="hero-text">
+<h1>RTO Vehicle Information</h1>
+<p>Check vehicle owner details instantly</p>
+<p>✔ Check RTO details instantly</p>
+<p>✔ Quick Number Plate Checker</p>
+<p>✔ Track Service Records</p>
+</div>
+
+<div class="hero-box">
+<h3>Enter Vehicle Number</h3>
+<input placeholder="TN 01 AB 1234">
+<button>Check Vehicle Details</button>
+</div>
+</div>
+
 <div class="dashboard">
 <div class="card"><h3>Total Owners</h3><p id="ownersCount">0</p></div>
 <div class="card"><h3>Total Vehicles</h3><p id="vehiclesCount">0</p></div>
 <div class="card"><h3>Total Services</h3><p id="servicesCount">0</p></div>
 </div>
+
 </div>
 
 <!-- OWNER -->
