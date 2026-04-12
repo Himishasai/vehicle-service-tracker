@@ -34,7 +34,7 @@ cursor:pointer;
 /* SECTIONS */
 .section { display:none; padding:25px; }
 
-/* HERO DASHBOARD */
+/* HERO */
 .hero{
 display:flex;
 justify-content:space-between;
@@ -50,33 +50,14 @@ font-size:30px;
 margin-bottom:10px;
 }
 
-.hero-box{
-background:white;
-padding:25px;
-border-radius:15px;
+/* IMAGE */
+.hero-img{
 width:300px;
-box-shadow:0 10px 25px rgba(0,0,0,0.08);
+border-radius:15px;
+animation:float 4s ease-in-out infinite;
 }
 
-.hero-box input{
-width:100%;
-padding:10px;
-margin:10px 0;
-border-radius:8px;
-border:1px solid #ccc;
-}
-
-.hero-box button{
-width:100%;
-padding:10px;
-background:#111;
-color:white;
-border:none;
-border-radius:8px;
-cursor:pointer;
-}
-
-/* DASHBOARD CARDS */
+/* DASHBOARD */
 .dashboard {
 display:grid;
 grid-template-columns:repeat(3,1fr);
@@ -89,12 +70,19 @@ background:white;
 padding:20px;
 border-radius:15px;
 box-shadow:0 4px 15px rgba(0,0,0,0.05);
+transition:0.3s;
+animation:fadeUp 0.6s ease;
+}
+
+.card:hover{
+transform:translateY(-5px);
+box-shadow:0 8px 25px rgba(0,0,0,0.1);
 }
 
 .card h3 { color:#888; font-size:14px; }
 .card p { font-size:28px; color:#2a9d8f; font-weight:bold; }
 
-/* INPUTS */
+/* INPUT */
 input,select {
 padding:10px;
 margin:5px;
@@ -153,6 +141,18 @@ padding:20px;
 border-radius:10px;
 width:300px;
 }
+
+/* ANIMATIONS */
+@keyframes fadeUp{
+from{opacity:0; transform:translateY(20px);}
+to{opacity:1; transform:translateY(0);}
+}
+
+@keyframes float{
+0%{transform:translateY(0px);}
+50%{transform:translateY(-10px);}
+100%{transform:translateY(0px);}
+}
 </style>
 </head>
 
@@ -183,11 +183,8 @@ width:300px;
 <p>✔ Track Service Records</p>
 </div>
 
-<div class="hero-box">
-<h3>Enter Vehicle Number</h3>
-<input placeholder="TN 01 AB 1234">
-<button>Check Vehicle Details</button>
-</div>
+<img src="https://cdn-icons-png.flaticon.com/512/743/743007.png" class="hero-img">
+
 </div>
 
 <div class="dashboard">
@@ -276,6 +273,7 @@ width:300px;
 if(localStorage.getItem("loggedIn") !== "true"){
 window.location.href="/login.html";
 }
+
 function logout(){
 localStorage.removeItem("loggedIn");
 window.location.href="/login.html";
