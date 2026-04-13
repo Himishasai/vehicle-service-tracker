@@ -164,7 +164,6 @@ to{opacity:1; transform:translateY(0);}
 <button onclick="showSection('vehicle')">Vehicle</button>
 <button onclick="showSection('service')">Service</button>
 <button onclick="showSection('history')">History</button>
-<button onclick="showSection('alerts')">Alerts</button>
 
 <div style="margin-left:auto;">
 <span>👤 Admin</span>
@@ -174,14 +173,18 @@ to{opacity:1; transform:translateY(0);}
 
 <!-- DASHBOARD -->
 <div id="dashboard" class="section">
+
 <div class="hero">
 <div class="hero-text">
 <h1>RTO Vehicle Information</h1>
+<p>Check vehicle owner details instantly</p>
 <p>✔ Check RTO details instantly</p>
 <p>✔ Quick Number Plate Checker</p>
 <p>✔ Track Service Records</p>
 </div>
+
 <img src="https://cdn-icons-png.flaticon.com/512/743/743007.png" class="hero-img">
+
 </div>
 
 <div class="dashboard">
@@ -189,6 +192,7 @@ to{opacity:1; transform:translateY(0);}
 <div class="card"><h3>Total Vehicles</h3><p id="vehiclesCount">0</p></div>
 <div class="card"><h3>Total Services</h3><p id="servicesCount">0</p></div>
 </div>
+
 </div>
 
 <!-- OWNER -->
@@ -253,15 +257,6 @@ to{opacity:1; transform:translateY(0);}
 </table>
 </div>
 
-<!-- ALERTS -->
-<div id="alerts" class="section">
-<h2>Service Alerts</h2>
-<table>
-<thead><tr><th>Vehicle</th><th>Days</th><th>Status</th></tr></thead>
-<tbody id="reminderTable"></tbody>
-</table>
-</div>
-
 <!-- MODAL -->
 <div class="modal" id="modal">
 <div class="modal-box">
@@ -275,10 +270,17 @@ to{opacity:1; transform:translateY(0);}
 <script>
 
 // LOGIN
-if(localStorage.getItem("loggedIn")!=="true"){window.location.href="/login.html";}
-function logout(){localStorage.removeItem("loggedIn");window.location.href="/login.html";}
+if(localStorage.getItem("loggedIn") !== "true"){
+window.location.href="/login.html";
+}
 
-// NAV
+function logout(){
+localStorage.removeItem("loggedIn");
+window.location.href="/login.html";
+}
+
+let editType="",editId="";
+
 function showSection(id){
 document.querySelectorAll(".section").forEach(s=>s.style.display="none");
 document.getElementById(id).style.display="block";
@@ -286,10 +288,15 @@ document.getElementById(id).style.display="block";
 
 // OWNER
 function addOwner(){
-if(!name.value||!phone.value||!address.value){alert("Fill all fields");return;}
+let nameVal=document.getElementById("name").value;
+let phoneVal=document.getElementById("phone").value;
+let addressVal=document.getElementById("address").value;
+
+if(!nameVal||!phoneVal||!addressVal){alert("Fill all fields");return;}
+
 fetch("/add_owner",{method:"POST",headers:{"Content-Type":"application/json"},
-body:JSON.stringify({name:name.value,phone:phone.value,address:address.value})})
-.then(()=>{name.value="";phone.value="";address.value="";loadOwners();loadDashboard();});
+body:JSON.stringify({name:nameVal,phone:phoneVal,address:addressVal})})
+.then(()=>{loadOwners();loadDashboard();});
 }
 
 function loadOwners(){
@@ -319,10 +326,16 @@ fetch("/delete_owner/"+id,{method:"DELETE"})
 
 // VEHICLE
 function addVehicle(){
-if(!ownerDropdown.value||!vehicle_number.value||!model.value||!type.value){alert("Fill all fields");return;}
+let owner_id=document.getElementById("ownerDropdown").value;
+let vehicle_numberVal=document.getElementById("vehicle_number").value;
+let modelVal=document.getElementById("model").value;
+let typeVal=document.getElementById("type").value;
+
+if(!owner_id||!vehicle_numberVal||!modelVal||!typeVal){alert("Fill all fields");return;}
+
 fetch("/add_vehicle",{method:"POST",headers:{"Content-Type":"application/json"},
-body:JSON.stringify({owner_id:ownerDropdown.value,vehicle_number:vehicle_number.value,model:model.value,type:type.value})})
-.then(()=>{vehicle_number.value="";model.value="";type.value="";loadVehicles();loadDashboard();});
+body:JSON.stringify({owner_id,vehicle_number:vehicle_numberVal,model:modelVal,type:typeVal})})
+.then(()=>{loadVehicles();loadDashboard();});
 }
 
 function loadVehicles(){
@@ -353,10 +366,16 @@ fetch("/delete_vehicle/"+id,{method:"DELETE"})
 
 // SERVICE
 function addService(){
-if(!vehicleDropdown.value||!date.value||!desc.value||!cost.value){alert("Fill all fields");return;}
+let vehicle_id=document.getElementById("vehicleDropdown").value;
+let service_dateVal=document.getElementById("date").value;
+let descriptionVal=document.getElementById("desc").value;
+let costVal=document.getElementById("cost").value;
+
+if(!vehicle_id||!service_dateVal||!descriptionVal||!costVal){alert("Fill all fields");return;}
+
 fetch("/add_service",{method:"POST",headers:{"Content-Type":"application/json"},
-body:JSON.stringify({vehicle_id:vehicleDropdown.value,service_date:date.value,description:desc.value,cost:cost.value})})
-.then(()=>{desc.value="";cost.value="";loadServices();loadHistory();loadDashboard();loadReminders();});
+body:JSON.stringify({vehicle_id,service_date:service_dateVal,description:descriptionVal,cost:costVal})})
+.then(()=>{loadServices();loadHistory();loadDashboard();});
 }
 
 function loadServices(){
@@ -380,7 +399,7 @@ serviceTable.innerHTML=rows;
 
 function deleteService(id){
 fetch("/delete_service/"+id,{method:"DELETE"})
-.then(()=>{loadServices();loadHistory();loadDashboard();loadReminders();});
+.then(()=>{loadServices();loadHistory();loadDashboard();});
 }
 
 // HISTORY
@@ -406,17 +425,6 @@ fetch("/dashboard").then(r=>r.json()).then(d=>{
 ownersCount.innerText=d.owners;
 vehiclesCount.innerText=d.vehicles;
 servicesCount.innerText=d.services;
-});
-}
-
-// ALERTS
-function loadReminders(){
-fetch("/service_reminders").then(r=>r.json()).then(data=>{
-let rows="";
-data.forEach(r=>{
-rows+=`<tr><td>${r.vehicle}</td><td>${r.days}</td><td>${r.status}</td></tr>`;
-});
-reminderTable.innerHTML=rows;
 });
 }
 
@@ -453,7 +461,14 @@ if(editType=="vehicle"){url="/update_vehicle/"+editId;body={owner_id:m1.value,ve
 if(editType=="service"){url="/update_service/"+editId;body={vehicle_id:m1.value,service_date:m2.value,description:m3.value,cost:m4.value};}
 
 fetch(url,{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)})
-.then(()=>{closeModal();loadOwners();loadVehicles();loadServices();loadHistory();loadDashboard();loadReminders();});
+.then(()=>{
+closeModal();
+loadOwners();
+loadVehicles();
+loadServices();
+loadHistory();
+loadDashboard();
+});
 }
 
 // INIT
@@ -463,9 +478,8 @@ loadVehicles();
 loadServices();
 loadHistory();
 loadDashboard();
-loadReminders();
 
 </script>
 
 </body>
-</html>
+</html> 
