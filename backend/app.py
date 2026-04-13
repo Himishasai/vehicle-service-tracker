@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
+from datetime import datetime
 
 app = Flask(__name__, static_folder="../frontend")
 CORS(app)
@@ -54,12 +55,10 @@ def get_owners():
     conn.close()
     return jsonify([dict(r) for r in rows])
 
-# 🔥 UPDATED DELETE OWNER
 @app.route("/delete_owner/<int:id>", methods=["DELETE"])
 def delete_owner(id):
     conn = get_db()
 
-    # DELETE SERVICES (via vehicles)
     conn.execute("""
         DELETE FROM Services
         WHERE vehicle_id IN (
@@ -67,10 +66,7 @@ def delete_owner(id):
         )
     """, (id,))
 
-    # DELETE VEHICLES
     conn.execute("DELETE FROM Vehicles WHERE owner_id=?", (id,))
-
-    # DELETE OWNER
     conn.execute("DELETE FROM Owners WHERE owner_id=?", (id,))
 
     conn.commit()
@@ -113,15 +109,11 @@ def get_vehicles():
     conn.close()
     return jsonify([dict(r) for r in rows])
 
-# 🔥 UPDATED DELETE VEHICLE
 @app.route("/delete_vehicle/<int:id>", methods=["DELETE"])
 def delete_vehicle(id):
     conn = get_db()
 
-    # DELETE SERVICES FIRST
     conn.execute("DELETE FROM Services WHERE vehicle_id=?", (id,))
-
-    # DELETE VEHICLE
     conn.execute("DELETE FROM Vehicles WHERE vehicle_id=?", (id,))
 
     conn.commit()
@@ -201,6 +193,50 @@ def dashboard():
     services = conn.execute("SELECT COUNT(*) FROM Services").fetchone()[0]
     conn.close()
     return jsonify({"owners": owners, "vehicles": vehicles, "services": services})
+
+# ---------- 🔔 SERVICE ALERTS (FINAL FIX) ----------
+@app.route("/service_reminders")
+def service_reminders():
+    conn = get_db()
+
+    rows = conn.execute("""
+        SELECT v.vehicle_number, MAX(s.service_date) as service_date
+        FROM Services s
+        JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
+        GROUP BY v.vehicle_id
+    """).fetchall()
+
+    result = []
+
+    for r in rows:
+        date_str = r["service_date"]
+
+        # ✅ HANDLE BOTH FORMATS
+        try:
+            last_date = datetime.strptime(date_str, "%Y-%m-%d")
+        except:
+            try:
+                last_date = datetime.strptime(date_str, "%d-%m-%Y")
+            except:
+                continue  # skip bad data
+
+        days = (datetime.now() - last_date).days
+
+        if days > 30:
+            status = "⚠️ Overdue"
+        elif days > 15:
+            status = "⏳ Upcoming"
+        else:
+            status = "✅ OK"
+
+        result.append({
+            "vehicle": r["vehicle_number"],
+            "days": days,
+            "status": status
+        })
+
+    conn.close()
+    return jsonify(result)
 
 # ---------- RUN ----------
 if __name__ == "__main__":
