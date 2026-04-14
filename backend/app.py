@@ -2,13 +2,15 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
-from datetime import datetime
 
 app = Flask(__name__, static_folder="../frontend")
 CORS(app)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "../database/vehicle.db")
+
+# ✅ FIXED DB PATH (IMPORTANT FOR RENDER)
+DB_PATH = os.path.join(BASE_DIR, "vehicle.db")
+
 FRONTEND_FOLDER = os.path.join(BASE_DIR, "../frontend")
 
 # ---------- DB ----------
@@ -17,6 +19,44 @@ def get_db():
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
+
+# ✅ CREATE TABLES IF NOT EXIST (VERY IMPORTANT FOR RENDER)
+def init_db():
+    conn = get_db()
+
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS Owners (
+        owner_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        phone TEXT,
+        address TEXT
+    )
+    """)
+
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS Vehicles (
+        vehicle_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        owner_id INTEGER,
+        vehicle_number TEXT,
+        model TEXT,
+        type TEXT,
+        FOREIGN KEY(owner_id) REFERENCES Owners(owner_id) ON DELETE CASCADE
+    )
+    """)
+
+    conn.execute("""
+    CREATE TABLE IF NOT EXISTS Services (
+        service_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        vehicle_id INTEGER,
+        service_date TEXT,
+        description TEXT,
+        cost REAL,
+        FOREIGN KEY(vehicle_id) REFERENCES Vehicles(vehicle_id) ON DELETE CASCADE
+    )
+    """)
+
+    conn.commit()
+    conn.close()
 
 # ---------- ROUTES ----------
 @app.route("/")
@@ -112,10 +152,8 @@ def get_vehicles():
 @app.route("/delete_vehicle/<int:id>", methods=["DELETE"])
 def delete_vehicle(id):
     conn = get_db()
-
     conn.execute("DELETE FROM Services WHERE vehicle_id=?", (id,))
     conn.execute("DELETE FROM Vehicles WHERE vehicle_id=?", (id,))
-
     conn.commit()
     conn.close()
     return jsonify({"message": "Deleted"})
@@ -194,40 +232,27 @@ def dashboard():
     conn.close()
     return jsonify({"owners": owners, "vehicles": vehicles, "services": services})
 
-# ---------- 🔔 SERVICE ALERTS (FINAL FIX) ----------
+# ---------- ALERTS (YOU WERE MISSING THIS 🔥) ----------
 @app.route("/service_reminders")
 def service_reminders():
     conn = get_db()
-
     rows = conn.execute("""
-        SELECT v.vehicle_number, MAX(s.service_date) as service_date
+        SELECT v.vehicle_number, s.service_date
         FROM Services s
         JOIN Vehicles v ON s.vehicle_id = v.vehicle_id
-        GROUP BY v.vehicle_id
     """).fetchall()
 
+    from datetime import datetime
+
     result = []
-
     for r in rows:
-        date_str = r["service_date"]
+        days = (datetime.now() - datetime.strptime(r["service_date"], "%Y-%m-%d")).days
 
-        # ✅ HANDLE BOTH FORMATS
-        try:
-            last_date = datetime.strptime(date_str, "%Y-%m-%d")
-        except:
-            try:
-                last_date = datetime.strptime(date_str, "%d-%m-%Y")
-            except:
-                continue  # skip bad data
-
-        days = (datetime.now() - last_date).days
-
-        if days > 30:
-            status = "⚠️ Overdue"
-        elif days > 15:
-            status = "⏳ Upcoming"
-        else:
-            status = "✅ OK"
+        status = "OK"
+        if days > 180:
+            status = "Service Due"
+        elif days > 90:
+            status = "Upcoming"
 
         result.append({
             "vehicle": r["vehicle_number"],
@@ -240,4 +265,5 @@ def service_reminders():
 
 # ---------- RUN ----------
 if __name__ == "__main__":
+    init_db()   # ✅ ensures DB exists in Render
     app.run(debug=True)
